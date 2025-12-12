@@ -11,14 +11,12 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: '0.0.0.0', // Allow external access
+    host: '0.0.0.0',
     strictPort: true
   },
   build: {
-    // Optimize build performance
     target: 'esnext',
-    minify: 'esbuild', // Use esbuild instead of terser (faster, no extra dependency)
-    // Code splitting for better caching
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {

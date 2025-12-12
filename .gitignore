@@ -111,3 +111,7 @@ tmp/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Startup logs
+backend.log
+frontend.log
