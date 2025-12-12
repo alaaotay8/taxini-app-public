@@ -1,6 +1,7 @@
 {
   "name": "taxini-frontend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Taxini Ride-Hailing Frontend Application",
   "main": "index.js",
   "scripts": {
