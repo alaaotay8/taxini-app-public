@@ -1,0 +1,350 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0a1f1a;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f2920;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a4d3a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ffd000;
+}
+
+/* Smooth Transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Custom Utilities */
+@layer components {
+  .btn-primary {
+    @apply bg-taxini-yellow text-taxini-dark font-semibold py-4 px-6 rounded-2xl 
+           hover:bg-taxini-yellow-dark active:scale-95 transition-all duration-200 
+           shadow-lg hover:shadow-taxini;
+  }
+
+  .btn-secondary {
+    @apply bg-taxini-green text-white font-semibold py-4 px-6 rounded-2xl 
+           hover:bg-opacity-80 active:scale-95 transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full bg-taxini-dark-light text-white px-4 py-3 rounded-xl 
+           border border-taxini-green focus:border-taxini-yellow 
+           focus:outline-none focus:ring-2 focus:ring-taxini-yellow focus:ring-opacity-20
+           placeholder-taxini-text-gray;
+  }
+
+  .input-field-dark {
+    @apply bg-[#0d2621] text-white py-4 rounded-2xl border-2 border-taxini-green/20 
+           focus:border-taxini-yellow focus:outline-none px-4 w-full 
+           transition-all focus:shadow-xl focus:ring-4 focus:ring-taxini-yellow/20
+           placeholder-gray-500 text-base;
+  }
+
+  .otp-input {
+    @apply w-14 h-14 bg-[#0d2621] text-white text-center text-2xl font-bold 
+           rounded-lg border-2 border-[#0d2621] 
+           focus:border-taxini-yellow focus:outline-none focus:ring-2 focus:ring-taxini-yellow focus:ring-opacity-30
+           transition-all duration-200;
+  }
+
+  /* Custom Scrollbar for forms */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 208, 0, 0.5);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 208, 0, 0.7);
+  }
+
+  .card-taxini {
+    @apply bg-taxini-dark-light rounded-taxini p-6 shadow-lg 
+           hover:shadow-taxini transition-all duration-300;
+  }
+
+  .page-container {
+    @apply min-h-screen bg-taxini-dark flex flex-col;
+  }
+
+  .phone-screen {
+    @apply max-w-md mx-auto w-full min-h-screen max-h-screen bg-taxini-dark 
+           flex flex-col relative overflow-hidden;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.6s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Page Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-leave-to {
+  transform: translateX(-100%);
+}
+
+/* ========================================
+   DYNAMIC CARD SIZING SYSTEM
+   Professional responsive card layouts
+   ======================================== */
+
+/* Driver Cards Container - Clean and Simple */
+.driver-cards-container {
+  width: 100%;
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;
+}
+
+/* Individual driver card */
+.driver-card {
+  width: 100%;
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  min-height: 110px;
+}
+
+/* Custom Scrollbar for Driver Cards */
+.driver-cards-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.driver-cards-container::-webkit-scrollbar-track {
+  background: rgba(13, 38, 33, 0.3);
+  border-radius: 3px;
+}
+
+.driver-cards-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.4);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.driver-cards-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.6);
+}
+
+/* Dynamic Trip Cards for Driver Dashboard */
+.dynamic-card-sizing {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: max-height;
+}
+
+.dynamic-card-sizing .sheet-content,
+.dynamic-card-sizing > div {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Simple slide-in animation */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .driver-cards-container {
+    max-height: 420px;
+  }
+  
+  .driver-card {
+    min-height: 100px;
+  }
+}
+
+/* Enhanced Card Hover Effects */
+.driver-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.driver-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.driver-card:hover::before {
+  left: 100%;
+}
+
+/* Trip Info Cards Dynamic Sizing */
+.bottom-sheet-container.dynamic-card-sizing {
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trip-request-card.dynamic-card-sizing {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUpFade 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUpFade {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Loading State for Dynamic Cards */
+.dynamic-card-sizing.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.dynamic-card-sizing.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

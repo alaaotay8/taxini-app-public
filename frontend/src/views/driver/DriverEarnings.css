@@ -1,0 +1,529 @@
+.driver-earnings {
+  min-height: 100vh;
+  background: #0a1f1a;
+  padding-bottom: 2rem;
+}
+
+.earnings-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #0d2621;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid rgba(255, 208, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #FFD000;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.btn-back:hover {
+  background: rgba(255, 208, 0, 0.1);
+}
+
+.btn-back svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.header-spacer {
+  width: 2.5rem;
+}
+
+.earnings-content {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: white;
+  text-align: center;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid rgba(255, 208, 0, 0.2);
+  border-top-color: #FFD000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.error-icon {
+  width: 4rem;
+  height: 4rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.error-container h3 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.error-container p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 2rem 0;
+  max-width: 400px;
+}
+
+.btn-retry {
+  background: #FFD000;
+  color: #0a1f1a;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+}
+
+/* Today's Stats Card */
+.stats-card {
+  background: linear-gradient(135deg, rgba(255, 208, 0, 0.15) 0%, rgba(255, 208, 0, 0.05) 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 2px solid rgba(255, 208, 0, 0.3);
+  margin-bottom: 1.5rem;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.stats-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.stats-date {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.main-earning {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.earning-amount {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #FFD000;
+  margin-bottom: 0.5rem;
+}
+
+.earning-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.quick-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0 auto 0.5rem;
+  color: #FFD000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Period Selector */
+.period-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.period-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.period-btn.active {
+  background: #FFD000;
+  color: #0a1f1a;
+}
+
+/* Chart Card */
+.chart-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 208, 0, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.chart-container {
+  height: 200px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 100%;
+  gap: 0.5rem;
+}
+
+.chart-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.chart-bar {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.bar-fill {
+  width: 100%;
+  background: linear-gradient(to top, #FFD000, #ffed4e);
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.5rem;
+  transition: all 0.3s;
+}
+
+.bar-fill:hover {
+  filter: brightness(1.2);
+}
+
+.bar-value {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0a1f1a;
+}
+
+.bar-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+/* Breakdown Card */
+.breakdown-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 208, 0, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.breakdown-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.breakdown-item.total {
+  padding-top: 1rem;
+}
+
+.breakdown-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.breakdown-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
+  color: white;
+}
+
+.breakdown-icon.total {
+  background: rgba(255, 208, 0, 0.2);
+}
+
+.breakdown-icon.total svg {
+  color: #FFD000;
+}
+
+.breakdown-icon.commission {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.breakdown-icon.commission svg {
+  color: #ef4444;
+}
+
+.breakdown-icon.net {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.breakdown-icon.net svg {
+  color: #22c55e;
+}
+
+.breakdown-info {
+  flex: 1;
+}
+
+.breakdown-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+}
+
+.breakdown-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+}
+
+.breakdown-value.negative {
+  color: #ef4444;
+}
+
+.breakdown-value.highlight {
+  color: #FFD000;
+  font-size: 1.5rem;
+}
+
+.breakdown-divider {
+  height: 2px;
+  background: rgba(255, 208, 0, 0.2);
+  margin: 0.5rem 0;
+}
+
+/* Peak Hours Card */
+.peak-hours-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 208, 0, 0.2);
+}
+
+.peak-hour-item {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.peak-hour-item.best {
+  background: rgba(255, 208, 0, 0.1);
+  border-color: rgba(255, 208, 0, 0.3);
+}
+
+.peak-hour-time {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.time-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #FFD000;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
+}
+
+.time-label {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.best-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  background: #FFD000;
+  color: #0a1f1a;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.best-badge svg {
+  width: 1rem;
+  height: 1rem;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.peak-hour-stats {
+  padding-left: 2.25rem;
+}
+
+.peak-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.peak-trips {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.peak-earnings {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFD000;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .earnings-content {
+    padding: 1rem;
+  }
+
+  .earning-amount {
+    font-size: 2.5rem;
+  }
+
+  .quick-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .quick-stat-item {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .stat-icon {
+    font-size: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+}

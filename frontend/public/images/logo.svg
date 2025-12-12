@@ -1,0 +1,26 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Taxi body -->
+  <rect x="30" y="80" width="140" height="70" rx="16" fill="#FFD000"/>
+  
+  <!-- Windows -->
+  <rect x="50" y="90" width="40" height="30" rx="4" fill="#0a1f1a" opacity="0.3"/>
+  <rect x="110" y="90" width="40" height="30" rx="4" fill="#0a1f1a" opacity="0.3"/>
+  
+  <!-- Wheels -->
+  <circle cx="60" cy="150" r="16" fill="#2d2d2d"/>
+  <circle cx="140" cy="150" r="16" fill="#2d2d2d"/>
+  <circle cx="60" cy="150" r="8" fill="#666"/>
+  <circle cx="140" cy="150" r="8" fill="#666"/>
+  
+  <!-- Taxi sign on top -->
+  <rect x="80" y="60" width="40" height="16" rx="4" fill="#FFD000"/>
+  <text x="100" y="72" font-size="12" text-anchor="middle" fill="#0a1f1a" font-weight="bold" font-family="Arial">TAXI</text>
+  
+  <!-- Headlight -->
+  <circle cx="24" cy="100" r="6" fill="#FFF" opacity="0.8"/>
+  
+  <!-- Checkered pattern on side -->
+  <rect x="95" y="130" width="8" height="8" fill="#0a1f1a" opacity="0.3"/>
+  <rect x="103" y="138" width="8" height="8" fill="#0a1f1a" opacity="0.3"/>
+  <rect x="111" y="130" width="8" height="8" fill="#0a1f1a" opacity="0.3"/>
+</svg>

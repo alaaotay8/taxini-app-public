@@ -1,0 +1,1150 @@
+/* ===================================
+   Rider Dashboard Styles
+   =================================== */
+
+/* Layout */
+.rider-dashboard {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #0a1f1a;
+}
+
+.map-wrapper {
+  position: absolute;
+  top: 72px;
+  left: 0;
+  right: 0;
+  height: calc(100vh - 72px);
+  width: 100%;
+}
+
+.map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Hide ALL Mapbox controls including zoom buttons */
+.map-container .mapboxgl-ctrl-logo,
+.map-container .mapboxgl-ctrl-attrib,
+.map-container .mapboxgl-ctrl-attrib-button,
+.map-container .mapboxgl-compact,
+.map-container .mapboxgl-ctrl,
+.map-container .mapboxgl-ctrl-group,
+.map-container .mapboxgl-ctrl-top-right,
+.map-container .mapboxgl-ctrl-top-left,
+.map-container .mapboxgl-ctrl-bottom-right,
+.map-container .mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-zoom-in,
+.mapboxgl-ctrl-zoom-out,
+.mapboxgl-ctrl-compass {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Hide bottom right controls (info icon) */
+.map-container .mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
+
+/* Hide bottom left controls (Mapbox logo) */
+.map-container .mapboxgl-ctrl-bottom-left {
+  display: none !important;
+}
+
+/* Additional rules to ensure ALL Mapbox elements are completely hidden */
+.rider-dashboard .mapboxgl-ctrl-logo,
+.rider-dashboard .mapboxgl-ctrl-attrib,
+.rider-dashboard .mapboxgl-ctrl-attrib-button,
+.rider-dashboard .mapboxgl-compact,
+.rider-dashboard .mapboxgl-ctrl-bottom-right,
+.rider-dashboard .mapboxgl-ctrl-bottom-left,
+.rider-dashboard .mapboxgl-ctrl-top-right,
+.rider-dashboard .mapboxgl-ctrl-top-left,
+.rider-dashboard .mapboxgl-ctrl,
+.rider-dashboard .mapboxgl-ctrl-group,
+.rider-dashboard .mapboxgl-ctrl-attrib-inner,
+.rider-dashboard .mapboxgl-ctrl-zoom-in,
+.rider-dashboard .mapboxgl-ctrl-zoom-out,
+.rider-dashboard .mapboxgl-ctrl-compass,
+a[href^="http://mapbox.com"],
+a[href^="https://www.mapbox.com"],
+a[title="Mapbox logo"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  max-height: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Cover bottom corners with overlay to hide any remaining branding */
+.map-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to top, rgba(10, 31, 26, 0.9) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Force hide ALL navigation controls */
+.map-wrapper .mapboxgl-ctrl-group,
+.map-wrapper .mapboxgl-ctrl-zoom-in,
+.map-wrapper .mapboxgl-ctrl-zoom-out,
+.map-wrapper .mapboxgl-ctrl,
+.map-wrapper .mapboxgl-ctrl-top-right,
+.map-wrapper button.mapboxgl-ctrl-zoom-in,
+.map-wrapper button.mapboxgl-ctrl-zoom-out {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -99999px !important;
+}
+
+/* Map Controls Group */
+.map-controls-group {
+  position: absolute;
+  top: 20px;
+  right: 10px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-control-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(26, 58, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.map-control-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #22c55e;
+}
+
+.map-control-btn:hover {
+  background: rgba(26, 58, 46, 1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+
+.map-control-btn:active {
+  transform: scale(0.95);
+}
+
+/* Location button separator */
+.map-control-location {
+  margin-top: 4px;
+  border-top: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.price-amount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFD000;
+  margin-bottom: 2px;
+}
+
+.price-eta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===================================
+   Show Bottom Sheet Button
+   =================================== */
+.show-sheet-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD000 0%, #FFA500 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 25;
+  box-shadow: 0 8px 24px rgba(255, 208, 0, 0.4);
+  transition: all 0.3s ease;
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+.show-sheet-btn:hover {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 12px 32px rgba(255, 208, 0, 0.5);
+}
+
+.show-sheet-btn svg {
+  width: 28px;
+  height: 28px;
+  color: #0a1f1a;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(255, 208, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(255, 208, 0, 0.6);
+  }
+}
+
+/* ===================================
+   Destination Marker
+   =================================== */
+.destination-marker {
+  width: 32px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  cursor: pointer;
+}
+
+/* ===================================
+   Destination Confirmation Overlay
+   =================================== */
+.destination-confirmation {
+  position: fixed;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: calc(100% - 32px);
+  max-width: 400px;
+  transition: bottom 0.3s ease;
+}
+
+.destination-confirmation-raised {
+  bottom: 420px;
+}
+
+.confirmation-card {
+  background: rgba(10, 31, 26, 0.98);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 208, 0, 0.3);
+}
+
+.confirmation-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-cancel,
+.btn-confirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #FFD000 0%, #FFA500 100%);
+  color: #0a1f1a;
+}
+
+.btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 208, 0, 0.4);
+}
+
+/* ===================================
+   Transitions
+   =================================== */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease-out;
+}
+
+.slide-up-enter-from {
+  transform: translateY(100%);
+}
+
+.slide-up-leave-to {
+  transform: translateY(100%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from {
+  transform: translateX(-20px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateX(-20px);
+  opacity: 0;
+}
+
+/* ===================================
+   Notifications Panel
+   =================================== */
+.notifications-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.notifications-panel {
+  position: fixed;
+  top: 85px;
+  right: 0;
+  width: 100%;
+  max-width: 340px;
+  height: calc(100vh - 85px);
+  background: rgba(8, 24, 20, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: -12px 0 60px rgba(0, 0, 0, 0.8);
+  border-left: 1px solid rgba(255, 208, 0, 0.15);
+  border-top-left-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notifications-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.btn-close-notifications {
+  background: transparent;
+  border: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-close-notifications:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: rotate(90deg);
+}
+
+.btn-close-notifications svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 2.5;
+}
+
+.notifications-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: transparent;
+}
+
+.notifications-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notifications-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notifications-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.notifications-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.notifications-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.notifications-empty .empty-icon {
+  width: 5rem;
+  height: 5rem;
+  color: rgba(255, 255, 255, 0.2);
+  stroke-width: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.notifications-empty .empty-text {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.notification-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.notification-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateX(-2px);
+}
+
+.notification-item.unread {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.notification-item.unread:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.notification-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.notification-icon.trip {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.notification-icon.cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.notification-icon.earnings {
+  background: rgba(255, 208, 0, 0.2);
+  color: #FFD000;
+}
+
+.notification-icon.info {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.notification-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.notification-message {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFD000;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.btn-clear-all {
+  margin: 1rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #ef4444;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-clear-all:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-left-enter-from .notifications-panel,
+.slide-left-leave-to .notifications-panel {
+  transform: translateX(100%);
+}
+
+.slide-left-enter-from .notifications-overlay,
+.slide-left-leave-to .notifications-overlay {
+  opacity: 0;
+}
+
+/* ===================================
+   Destination Suggestions Dropdown
+   =================================== */
+.destination-wrapper {
+  position: relative;
+}
+
+.destination-suggestions-dropdown {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: rgba(13, 38, 33, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 208, 0, 0.2);
+  overflow: hidden;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 100;
+  animation: slideUpFade 0.3s ease-out;
+}
+
+.destination-suggestions-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.destination-suggestions-dropdown::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.destination-suggestions-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 208, 0, 0.3);
+  border-radius: 3px;
+}
+
+.destination-suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 208, 0, 0.5);
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestions-dropdown-top {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   Toast Notification
+   =================================== */
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: rgba(13, 38, 33, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  min-width: 280px;
+  max-width: 90%;
+  border: 2px solid;
+}
+
+.toast-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(13, 38, 33, 0.98);
+}
+
+.toast-error .toast-icon {
+  color: #ef4444;
+}
+
+.toast-warning {
+  border-color: rgba(255, 208, 0, 0.5);
+  background: rgba(13, 38, 33, 0.98);
+}
+
+.toast-warning .toast-icon {
+  color: #FFD000;
+}
+
+.toast-success {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(13, 38, 33, 0.98);
+}
+
+.toast-success .toast-icon {
+  color: #22c55e;
+}
+
+.toast-info {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(13, 38, 33, 0.98);
+}
+
+.toast-info .toast-icon {
+  color: #3b82f6;
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.toast-message {
+  flex: 1;
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-slide-enter-from,
+.toast-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(2rem);
+}
+
+/* ===================================
+   DESKTOP/PC RESPONSIVE STYLES
+   =================================== */
+
+/* Tablets and larger (768px+) */
+@media (min-width: 768px) {
+  /* Adjust top bar for larger screens */
+  .top-bar {
+    padding: 0 2rem;
+    height: 80px;
+  }
+  
+  .map-wrapper {
+    top: 80px;
+    height: calc(100vh - 80px);
+  }
+  
+  /* Drivers panel - make it larger */
+  .drivers-panel {
+    width: 350px;
+    top: 24px;
+    left: 24px;
+    max-height: calc(100vh - 240px);
+  }
+  
+  /* Trip controls - wider */
+  .trip-controls-container {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  /* Bottom sheet - constrained width */
+  .bottom-sheet {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px 24px 0 0;
+  }
+  
+  .bottom-sheet.expanded {
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  .bottom-sheet.collapsed {
+    transform: translateX(-50%) translateY(calc(100% - 120px));
+  }
+}
+
+/* Desktop and larger (1024px+) */
+@media (min-width: 1024px) {
+  /* Layout - use sidebar instead of overlay panels */
+  .rider-dashboard {
+    display: flex;
+  }
+  
+  /* Left sidebar for drivers and controls */
+  .desktop-sidebar {
+    position: relative;
+    width: 400px;
+    height: 100vh;
+    background: rgba(10, 31, 26, 0.98);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 208, 0, 0.2);
+    overflow-y: auto;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Map takes remaining space */
+  .map-wrapper {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+  }
+  
+  /* Drivers panel in sidebar */
+  .drivers-panel {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-height: none;
+    background: transparent;
+    backdrop-filter: none;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 1rem;
+  }
+  
+  .drivers-panel-header {
+    padding: 1.5rem;
+    border-radius: 0;
+  }
+  
+  /* Top bar spans full width */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(10, 31, 26, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 208, 0, 0.2);
+  }
+  
+  /* Trip controls in sidebar */
+  .trip-controls-container {
+    position: relative;
+    bottom: auto;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    padding: 1.5rem;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid rgba(255, 208, 0, 0.2);
+  }
+  
+  /* Bottom sheet as right panel */
+  .bottom-sheet {
+    position: fixed;
+    right: 0;
+    left: auto;
+    bottom: 0;
+    top: 80px;
+    width: 450px;
+    max-width: 450px;
+    height: calc(100vh - 80px);
+    transform: translateX(0);
+    border-radius: 0;
+    border-left: 1px solid rgba(255, 208, 0, 0.2);
+    overflow-y: auto;
+  }
+  
+  .bottom-sheet.collapsed {
+    transform: translateX(100%);
+  }
+  
+  .bottom-sheet.expanded {
+    transform: translateX(0);
+  }
+  
+  /* Adjust driver cards for larger screens */
+  .driver-card {
+    padding: 1rem;
+  }
+  
+  .driver-info h3 {
+    font-size: 1.125rem;
+  }
+  
+  .driver-info p {
+    font-size: 0.9375rem;
+  }
+  
+  /* Larger buttons */
+  .btn-select-driver,
+  .btn-confirm-trip,
+  .btn-cancel-trip {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Large desktop (1440px+) */
+@media (min-width: 1440px) {
+  .desktop-sidebar {
+    width: 480px;
+  }
+  
+  .bottom-sheet {
+    width: 500px;
+    max-width: 500px;
+  }
+  
+  .drivers-panel-header {
+    padding: 2rem;
+  }
+  
+  .trip-controls-container {
+    padding: 2rem;
+  }
+}
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .desktop-sidebar {
+    width: 550px;
+  }
+  
+  .bottom-sheet {
+    width: 600px;
+    max-width: 600px;
+  }
+  
+  /* Scale up text slightly */
+  .driver-info h3 {
+    font-size: 1.25rem;
+  }
+  
+  .driver-info p {
+    font-size: 1rem;
+  }
+  
+  .location-input {
+    font-size: 1rem;
+  }
+  
+  .btn-select-driver,
+  .btn-confirm-trip {
+    font-size: 1.125rem;
+    padding: 1.25rem;
+  }
+}
+
+/* ===================================
+   Dynamic Driver Cards Animations
+   =================================== */
+
+/* Slide-in animation for driver cards */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.driver-card {
+  opacity: 0;
+  animation: slideInFromLeft 0.4s ease-out forwards;
+}
+
+/* Driver card container transitions */
+.driver-cards-container {
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  padding: 8px 0;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  background: transparent; /* Ensure no background */
+}
+
+/* Smooth scrollbar styling - very subtle */
+.driver-cards-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.driver-cards-container::-webkit-scrollbar-track {
+  background: transparent; /* Remove background */
+}
+
+.driver-cards-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 193, 7, 0.2);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.driver-cards-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 193, 7, 0.4);
+}
+
+/* Firefox scrollbar */
+.driver-cards-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 193, 7, 0.2) transparent;
+}
+
+/* Dynamic heights based on driver count */
+.driver-cards-container.single-driver {
+  max-height: 110px; /* Fits exactly one card */
+  overflow: hidden;
+}
+
+.driver-cards-container.single-driver .driver-card {
+  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.15);
+}
+
+.driver-cards-container.two-drivers {
+  max-height: 230px; /* Fits exactly two cards */
+  overflow: hidden;
+}
+
+.driver-cards-container.two-drivers .driver-card {
+  box-shadow: 0 2px 12px rgba(255, 193, 7, 0.1);
+}
+
+.driver-cards-container.three-drivers {
+  max-height: 350px; /* Fits exactly three cards */
+  overflow-y: auto;
+}
+
+.driver-cards-container.many-drivers {
+  max-height: 350px; /* Max 3 visible, then scroll */
+  overflow-y: scroll;
+}
+
+/* Scroll indicator gradient overlay for many drivers */
+.driver-cards-container.many-drivers::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to top, rgba(10, 31, 26, 0.9), transparent);
+  pointer-events: none;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Enhanced hover effects */
+.driver-card:hover {
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.9), rgba(13, 38, 33, 0.7)) !important;
+}
+
+/* Selected driver card pulse animation */
+.driver-card.border-taxini-yellow {
+  animation: slideInFromLeft 0.4s ease-out forwards, pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+  }
+}
+
+/* Responsive adjustments for driver cards */
+@media (max-width: 640px) {
+  .driver-card {
+    padding: 12px;
+  }
+  
+  .driver-cards-container {
+    padding: 4px 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .driver-cards-container {
+    padding: 12px 0;
+  }
+  
+  .driver-card:hover {
+    transform: scale(1.03);
+  }
+}
