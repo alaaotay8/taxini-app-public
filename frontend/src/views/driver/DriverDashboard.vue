@@ -1360,14 +1360,6 @@ const startConfirmationPolling = () => {
     }
   }, 2000) // Check every 2 seconds
 }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error checking confirmation status:', error)
-    }
-  }, 2000) // Check every 2 seconds
-}
 
 const stopConfirmationPolling = () => {
   if (confirmationPollingInterval) {
