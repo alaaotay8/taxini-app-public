@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "taxini-backend"
 version = "0.1.0"
 description = "Taxini Backend API built with FastAPI."
-readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary" }
 authors = [{ name = "Taxini Team" }]
