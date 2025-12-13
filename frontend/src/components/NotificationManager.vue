@@ -251,13 +251,21 @@ onUnmounted(() => {
 .toast-container {
   position: fixed;
   top: 80px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10001;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 420px;
   width: calc(100% - 40px);
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .toast-container {
+    width: 90%;
+    max-width: 800px;
+  }
 }
 
 /* Toast Notification */
@@ -308,16 +316,19 @@ onUnmounted(() => {
 }
 
 .toast-title {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 16px;
   margin-bottom: 4px;
   color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: -0.3px;
 }
 
 .toast-text {
   font-size: 14px;
   color: #4a5568;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .toast-close {

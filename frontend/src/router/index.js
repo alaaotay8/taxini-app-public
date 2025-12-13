@@ -186,10 +186,19 @@ const router = createRouter({
 })
 
 // Navigation Guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.meta.requiresAuth
   const requiredRole = to.meta.role
+
+  // If token exists but no user data, try to fetch user
+  if (authStore.token && !authStore.user) {
+    try {
+      await authStore.getCurrentUser()
+    } catch (error) {
+      console.warn('Failed to fetch user on navigation:', error.message)
+    }
+  }
 
   // Check token expiration (client-side check)
   if (authStore.token && isTokenExpired(authStore.token)) {

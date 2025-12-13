@@ -1334,10 +1334,14 @@ const startConfirmationPolling = () => {
           stopConfirmationPolling()
           showWaitingNotification.value = false
           
-          // Update current trip with confirmation status
+          // Update current trip with confirmation status - FORCE REACTIVITY
           if (currentTrip.value) {
-            currentTrip.value.rider_confirmed_pickup = true
-            // Don't change status - it should remain 'accepted'
+            // Use Object.assign to trigger Vue reactivity
+            Object.assign(currentTrip.value, {
+              ...currentTrip.value,
+              rider_confirmed_pickup: true
+            })
+            console.log('✅ Current trip updated with rider confirmation:', currentTrip.value.rider_confirmed_pickup)
           }
           
           console.log('✅ Rider confirmed pickup - Start Trip button now enabled')
@@ -1348,6 +1352,14 @@ const startConfirmationPolling = () => {
               'You can now start the trip',
               { title: 'Rider Confirmed Pickup', priority: 'high' }
             )
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking confirmation status:', error)
+    }
+  }, 2000) // Check every 2 seconds
+}
           }
         }
       }
