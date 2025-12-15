@@ -77,9 +77,8 @@ class GeocodingService:
                     return self._format_address(location_data, latitude, longitude, include_coords)
                     
         except Exception as e:
-            print(f"Geocoding error for ({latitude}, {longitude}): {e}")
+            logger.error(f"Geocoding error for ({latitude}, {longitude}): {e}")
         
-        # Fallback to coordinates if geocoding fails
         return f"{latitude:.4f}°, {longitude:.4f}°"
     
     def _extract_location_details(self, features: list) -> Dict[str, Any]:

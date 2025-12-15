@@ -91,6 +91,7 @@
       </button>
       <div class="top-bar-title">
         <h1>Hi, {{ driverFirstName }}!</h1>
+        <p class="top-bar-subtitle">Ready to earn today?</p>
       </div>
       <button @click="toggleNotifications" class="btn-notification">
         <svg xmlns="http://www.w3.org/2000/svg" class="notification-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,64 +102,10 @@
     </div>
 
     <!-- Notifications Panel -->
-    <transition name="slide-left">
-      <div v-if="showNotificationsPanel" class="notifications-overlay" @click="toggleNotifications">
-        <div class="notifications-panel" @click.stop>
-          <div class="notifications-header">
-            <h2 class="notifications-title">Notifications</h2>
-            <button @click="toggleNotifications" class="btn-close-notifications">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="notifications-content">
-            <div v-if="notifications.length === 0" class="notifications-empty">
-              <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              <p class="empty-text">No notifications yet</p>
-            </div>
-
-            <div v-else class="notifications-list">
-              <div 
-                v-for="notification in notifications" 
-                :key="notification.id" 
-                class="notification-item"
-                :class="{ 'unread': !notification.read }"
-                @click="markAsRead(notification.id)"
-              >
-                <div class="notification-icon" :class="notification.type">
-                  <svg v-if="notification.type === 'trip'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else-if="notification.type === 'cancelled'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else-if="notification.type === 'earnings'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div class="notification-content">
-                  <h4 class="notification-title">{{ notification.title }}</h4>
-                  <p class="notification-message">{{ notification.message }}</p>
-                  <span class="notification-time">{{ notification.time }}</span>
-                </div>
-                <div v-if="!notification.read" class="unread-dot"></div>
-              </div>
-            </div>
-          </div>
-
-          <button @click="clearAllNotifications_func" class="btn-clear-all" v-if="notifications.length > 0">
-            Clear All
-          </button>
-        </div>
-      </div>
-    </transition>
+    <NotificationPanel 
+      :is-open="showNotificationsPanel" 
+      @close="toggleNotifications"
+    />
 
     <!-- Side Menu Drawer (Like Rider) -->
     <transition name="slide-left">
@@ -260,18 +207,6 @@
             <div class="summary-card">
               <div class="summary-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="1" x2="12" y2="23"/>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-              </div>
-              <div class="summary-info">
-                <div class="summary-value">{{ todayEarnings.toFixed(2) }} TND</div>
-                <div class="summary-label">Earnings</div>
-              </div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
@@ -279,6 +214,18 @@
               <div class="summary-info">
                 <div class="summary-value">{{ todayTrips }}</div>
                 <div class="summary-label">Trips</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"/>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div class="summary-info">
+                <div class="summary-value">{{ todayEarnings.toFixed(2) }} TND</div>
+                <div class="summary-label">Earnings</div>
               </div>
             </div>
             <div class="summary-card">
@@ -414,7 +361,7 @@
     
     <transition name="modal-fade">
       <div v-if="incomingRequest && isModalContentVisible" class="trip-request-modal">
-        <div class="modal-overlay" @click="declineTrip"></div>
+        <div class="modal-overlay"></div>
         <!-- Modal content -->
         <div class="modal-content compact">
           <!-- Countdown Timer -->
@@ -441,8 +388,8 @@
             <div class="rider-details">
               <div class="rider-name">{{ incomingRequest.rider_name }}</div>
               <div class="rider-rating">
-                <span class="rating-stars">⭐ {{ incomingRequest.rider_rating || 4.8 }}</span>
-                <span class="rating-count">({{ incomingRequest.rider_trips || 45 }} trips)</span>
+                <span class="rating-stars">⭐ {{ formatRating(incomingRequest.rider_rating) }}</span>
+                <span class="rating-count">({{ incomingRequest.rider_trips || 0 }} trips)</span>
               </div>
             </div>
           </div>
@@ -917,7 +864,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { driverAPI } from '@/services/api'
@@ -926,7 +873,8 @@ import { useDriverStatus } from '@/composables/driver/useDriverStatus'
 import { useDriverTrip } from '@/composables/driver/useDriverTrip'
 import { useDriverUI } from '@/composables/driver/useDriverUI'
 import { useDriverRouting } from '@/composables/driver/useDriverRouting'
-import { useNotificationStore } from '@/services/notificationStore'
+import { useNotificationStore } from '@/stores/notificationStore'
+import NotificationPanel from '@/components/NotificationPanel.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -938,14 +886,7 @@ const isAccountRestricted = computed(() => accountStatus.value !== 'verified')
 // Check driver account status from API
 const checkApprovalStatus = async () => {
   try {
-    // Check if token exists
-    const token = localStorage.getItem('taxini_token')
-    if (!token) {
-      console.warn('⚠️ No authentication token found')
-      window.location.href = '/login'
-      return
-    }
-    
+    // Cookie-based auth - no token check needed
     console.log('🔍 Fetching driver profile...')
     const response = await driverAPI.getDriverProfile()
     if (response.success && response.driver) {
@@ -976,20 +917,39 @@ const checkApprovalStatus = async () => {
 
 // Notifications State
 const showNotificationsPanel = ref(false)
-const {
-  notifications,
-  unreadCount,
-  markAsRead,
-  clearAll: clearAllNotifications,
-  notifyTripCompleted,
-  notifyTripCancelled,
-  notifyTripRequested,
-  notifyEarningsUpdate
-} = useNotificationStore()
+const notificationStore = useNotificationStore()
+const notifications = computed(() => notificationStore.notifications)
+const unreadNotifications = computed(() => notificationStore.unreadCount)
 
-// Alias for compatibility
-const markAsRead_compat = markAsRead
-const clearAllNotifications_compat = clearAllNotifications
+// Fetch notifications on mount and periodically
+const fetchNotifications = async () => {
+  try {
+    await notificationStore.fetchNotifications()
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error)
+  }
+}
+
+// Watch for panel open to fetch and mark as read
+watch(showNotificationsPanel, async (isOpen) => {
+  if (isOpen) {
+    await fetchNotifications()
+    // Mark today's notifications as read when panel opens
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    for (const notif of notifications.value) {
+      if (!notif.is_read) {
+        const notifDate = new Date(notif.created_at)
+        notifDate.setHours(0, 0, 0, 0)
+        
+        if (notifDate.getTime() === today.getTime()) {
+          await notificationStore.markAsRead(notif.id)
+        }
+      }
+    }
+  }
+})
 
 // Confirmation Waiting State
 const showWaitingNotification = ref(false)
@@ -1024,6 +984,9 @@ const {
   removeDestinationMarker,
   fitMapToBounds,
   drawRoute,
+  drawBothRoutes,
+  clearApproachRoute,
+  clearTripRoute,
   startNavigation,
   stopNavigation,
   clearRoute,
@@ -1108,11 +1071,16 @@ const {
   logout: baseLogout
 } = useDriverUI()
 
-// Override unreadNotifications from composable with our computed value
-const unreadNotifications = unreadCount
-
 // Local state for UI controls
 const showTripCard = ref(true) // Toggle for trip info card visibility
+
+// Format rating to 1 decimal place
+const formatRating = (rating) => {
+  if (rating === null || rating === undefined) return 'New'
+  const num = parseFloat(rating)
+  if (isNaN(num)) return 'New'
+  return num.toFixed(1)
+}
 
 // Override handleMapClick to also hide the trip card
 const handleMapClick = (event) => {
@@ -1174,7 +1142,7 @@ const toggleOnlineStatus = async () => {
   await baseToggleOnlineStatus(currentTrip, startPollingTrips, stopPollingTrips)
 }
 
-// Preview trip route (pickup → destination)
+// Preview trip route (pickup → destination) with driver-to-pickup route
 const previewTripRoute = async () => {
   if (!incomingRequest.value) {
     console.warn('❌ No trip request to preview')
@@ -1187,12 +1155,15 @@ const previewTripRoute = async () => {
     // Hide route and show modal again
     console.log('✅ Showing modal, hiding route')
     clearAllRoutes()
+    removePickupMarker()
+    removeDestinationMarker()
     routeMode.value = null
     isModalContentVisible.value = true
   } else {
     // Show route and hide modal
     console.log('✅ Showing route, hiding modal')
     console.log('Coordinates:', {
+      driver: driverLocation.value ? `${driverLocation.value.latitude}, ${driverLocation.value.longitude}` : 'N/A',
       pickup: `${incomingRequest.value.pickup_latitude}, ${incomingRequest.value.pickup_longitude}`,
       destination: `${incomingRequest.value.destination_latitude}, ${incomingRequest.value.destination_longitude}`
     })
@@ -1200,6 +1171,11 @@ const previewTripRoute = async () => {
     isModalContentVisible.value = false
     routeMode.value = 'preview'
     
+    // Add pickup and destination markers
+    addPickupMarker(incomingRequest.value.pickup_latitude, incomingRequest.value.pickup_longitude)
+    addDestinationMarker(incomingRequest.value.destination_latitude, incomingRequest.value.destination_longitude)
+    
+    // Show yellow route (pickup → destination)
     await showTripRoutePreview(
       {
         longitude: incomingRequest.value.pickup_longitude,
@@ -1211,13 +1187,24 @@ const previewTripRoute = async () => {
       }
     )
     
-    console.log('✅ Route preview completed')
+    // Show blue route (driver → pickup) if driver location is available
+    if (driverLocation.value?.latitude && driverLocation.value?.longitude) {
+      await showDriverToPickupRoute({
+        longitude: incomingRequest.value.pickup_longitude,
+        latitude: incomingRequest.value.pickup_latitude
+      })
+    }
+    
+    // Fit map to show all markers and routes
+    fitMapToBounds()
+    
+    console.log('✅ Route preview completed with markers and both routes')
   }
 }
 
 const acceptTrip = async () => {
   try {
-    await baseAcceptTrip(driverLocation, calculateDistance, drawRoute)
+    await baseAcceptTrip(driverLocation, calculateDistance, (origin, dest) => drawRoute(origin, dest, 'approach'))
     addPickupMarker(currentTrip.value.pickup_lat, currentTrip.value.pickup_lng)
     addDestinationMarker(currentTrip.value.destination_lat, currentTrip.value.destination_lng)
     
@@ -1227,11 +1214,10 @@ const acceptTrip = async () => {
     // Reset modal visibility
     isModalContentVisible.value = true
     
-    // Show driver-to-pickup route (blue) + keep trip route (yellow)
-    await showDriverToPickupRoute({
-      latitude: currentTrip.value.pickup_lat,
-      longitude: currentTrip.value.pickup_lng
-    })
+    // Draw both routes: blue (driver->pickup) + yellow (pickup->destination)
+    const pickup = { lat: currentTrip.value.pickup_lat, lng: currentTrip.value.pickup_lng }
+    const destination = { lat: currentTrip.value.destination_lat, lng: currentTrip.value.destination_lng }
+    await drawBothRoutes(driverLocation.value, pickup, destination)
     
     fitMapToBounds()
   } catch (error) {
@@ -1248,12 +1234,6 @@ const declineTrip = () => {
     removeDestinationMarker()
     clearAllRoutes() // Clear all route layers
     isModalContentVisible.value = true // Reset modal visibility
-    
-    // Show confirmation notification
-    window.$notification?.info(
-      'You have declined the trip request. The rider has been notified.',
-      { title: 'Trip Declined', priority: 'normal' }
-    )
   })
 }
 
@@ -1262,15 +1242,16 @@ const startTrip = async () => {
     'Start Trip',
     'Have you picked up the rider? Ready to start the trip?',
     async () => {
+      showDialog.value = false // Close dialog immediately
       try {
         loading.value = true
         loadingMessage.value = 'Starting trip...'
-        showDialog.value = false
         
-        // Hide driver-to-pickup route, keep only trip route
+        // Clear approach route (blue), keep only trip route (yellow)
+        clearApproachRoute()
         hideDriverToPickupRoute()
         
-        await baseStartTrip(driverLocation, removePickupMarker, drawRoute)
+        await baseStartTrip(driverLocation, removePickupMarker, (origin, dest) => drawRoute(origin, dest, 'trip'))
         
         // Show trip card when trip starts
         showTripCard.value = true
@@ -1334,14 +1315,10 @@ const startConfirmationPolling = () => {
           stopConfirmationPolling()
           showWaitingNotification.value = false
           
-          // Update current trip with confirmation status - FORCE REACTIVITY
+          // Update current trip with confirmation status
           if (currentTrip.value) {
-            // Use Object.assign to trigger Vue reactivity
-            Object.assign(currentTrip.value, {
-              ...currentTrip.value,
-              rider_confirmed_pickup: true
-            })
-            console.log('✅ Current trip updated with rider confirmation:', currentTrip.value.rider_confirmed_pickup)
+            currentTrip.value.rider_confirmed_pickup = true
+            // Don't change status - it should remain 'accepted'
           }
           
           console.log('✅ Rider confirmed pickup - Start Trip button now enabled')
@@ -1543,8 +1520,8 @@ const fetchInitialStatus = async () => {
 const handleBeforeUnload = async () => {
   try {
     // Use sendBeacon for reliability when page is closing
-    const token = localStorage.getItem('taxini_token')
-    if (token && authStore.isDriver) {
+    // Cookie-based auth - check if user is authenticated
+    if (authStore.isAuthenticated && authStore.isDriver) {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
       const blob = new Blob([JSON.stringify({ status: 'offline' })], { type: 'application/json' })
       navigator.sendBeacon(`${apiBaseUrl}/drivers/status`, blob)
@@ -1560,6 +1537,28 @@ onMounted(async () => {
   // Add beforeunload event listener
   window.addEventListener('beforeunload', handleBeforeUnload)
   
+  // Fetch notifications initially (non-blocking, allow failures)
+  Promise.all([
+    fetchNotifications(),
+    notificationStore.fetchUnreadCount()
+  ]).catch(err => {
+    console.warn('⚠️ Could not fetch notifications on mount:', err.message)
+  })
+  
+  // Poll notifications every 30 seconds
+  const notificationPollInterval = setInterval(async () => {
+    try {
+      await notificationStore.fetchUnreadCount()
+    } catch (err) {
+      // Silently fail
+    }
+  }, 30000)
+  
+  // Clean up notification polling on unmount
+  onUnmounted(() => {
+    clearInterval(notificationPollInterval)
+  })
+  
   // Start map initialization immediately (non-blocking)
   initMap()
   
@@ -1570,17 +1569,9 @@ onMounted(async () => {
       await checkApprovalStatus()
       await fetchInitialStatus()
       
-      // Force driver to offline status on mount
-      if (isOnline.value) {
-        try {
-          await driverAPI.updateStatus('offline')
-          isOnline.value = false
-          stopPollingTrips()
-          console.log('✅ Driver set to offline on dashboard mount')
-        } catch (error) {
-          console.error('❌ Failed to set offline on mount:', error)
-        }
-      }
+      // Don't automatically change status on mount - respect backend status
+      // Driver can manually toggle online/offline using the button
+      console.log('✅ Driver status loaded:', isOnline.value ? 'online' : 'offline')
     })(),
     
     // Check for active trip in parallel
@@ -1653,19 +1644,12 @@ onMounted(async () => {
   }
 })
 
-onUnmounted(async () => {
+onUnmounted(() => {
   // Remove beforeunload event listener
   window.removeEventListener('beforeunload', handleBeforeUnload)
   
-  // Set driver offline when component unmounts
-  try {
-    if (authStore.isDriver) {
-      await driverAPI.updateStatus('offline')
-      console.log('✅ Driver set to offline on component unmount')
-    }
-  } catch (error) {
-    console.error('❌ Failed to set driver offline on unmount:', error)
-  }
+  // Don't set driver offline on unmount - only on window close or explicit logout
+  // This allows navigation within the app without going offline
   
   stopLocationTracking()
   cleanupStatus()

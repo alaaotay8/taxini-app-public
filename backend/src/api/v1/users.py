@@ -24,6 +24,7 @@ from src.services.realtime_location import RealtimeLocationService
 from src.db.session import get_session
 from src.schemas.auth import CurrentUser
 from src.models.enums import UserRole
+from src.models.user import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["User Management"])
@@ -215,7 +216,16 @@ async def update_profile(
     logger.info(f"Update profile request for user: {current_user.auth_id}")
     
     # Get all user profiles for this auth_id
-    user_profiles = UserService.get_user_profiles_by_auth_id(session, current_user.auth_id)
+    # In development mode, current_user.auth_id is actually the user ID
+    if settings.development_mode:
+        # Look up by user ID directly
+        user_profile = session.get(User, current_user.auth_id)
+        user_profiles = [user_profile] if user_profile else []
+        logger.info(f"Development mode: Looking up user by ID {current_user.auth_id}")
+    else:
+        # Production mode: Look up by auth_id
+        user_profiles = UserService.get_user_profiles_by_auth_id(session, current_user.auth_id)
+    
     if not user_profiles:
         raise HTTPException(
             status_code=404,
@@ -233,9 +243,21 @@ async def update_profile(
     
     # Update shared data across all profiles if any shared fields are being updated
     if shared_data:
-        shared_result = UserService.update_shared_data_across_profiles(
-            session, current_user.auth_id, shared_data
-        )
+        # In dev mode, update by user ID; in production, update by auth_id
+        if settings.development_mode:
+            # Update the single user profile directly
+            for key, value in shared_data.items():
+                setattr(user_profiles[0], key, value)
+            session.add(user_profiles[0])
+            session.commit()
+            session.refresh(user_profiles[0])
+            logger.info(f"Development mode: Updated user {user_profiles[0].id} directly")
+            shared_result = {"success": True, "message": "Profile updated successfully"}
+        else:
+            shared_result = UserService.update_shared_data_across_profiles(
+                session, current_user.auth_id, shared_data
+            )
+        
         if not shared_result["success"]:
             raise HTTPException(
                 status_code=400,
@@ -244,30 +266,51 @@ async def update_profile(
         logger.info(f"Shared data updated: {shared_result['message']}")
     
     # Handle residence_place update (rider-specific)
-    rider_profile = None
-    if request.role_specific_data and "residence_place" in request.role_specific_data:
-        # Find rider profile to update residence_place
+    rider_user = None
+    residence_to_update = request.residence_place or (request.role_specific_data.get("residence_place") if request.role_specific_data else None)
+    
+    if residence_to_update:
+        # Find rider user to update residence_place
         for user in user_profiles:
             if user.role == "rider":
-                rider_profile = user
+                rider_user = user
                 break
         
-        if rider_profile:
-            # Update only residence_place
-            rider_data = {"residence_place": request.role_specific_data["residence_place"]}
-            result = UserService.update_user_profile(
-                session=session,
-                user_id=rider_profile.id,
-                user_data={},  # Shared data already updated above
-                role_data=rider_data
-            )
-            
-            if not result["success"]:
-                raise HTTPException(
-                    status_code=400,
-                    detail=result["message"]
+        if rider_user:
+            # Update residence_place directly in dev mode, or through service in production
+            if settings.development_mode:
+                # Get the actual Rider profile from the relationship
+                from src.models.user import Rider
+                from sqlmodel import select
+                
+                rider_profile = session.exec(
+                    select(Rider).where(Rider.user_id == rider_user.id)
+                ).first()
+                
+                if rider_profile:
+                    rider_profile.residence_place = residence_to_update
+                    session.add(rider_profile)
+                    session.commit()
+                    session.refresh(rider_profile)
+                    logger.info(f"Development mode: Updated rider residence_place to {residence_to_update}")
+                else:
+                    logger.warning(f"Rider profile not found for user {rider_user.id}")
+            else:
+                # Update only residence_place
+                rider_data = {"residence_place": residence_to_update}
+                result = UserService.update_user_profile(
+                    session=session,
+                    user_id=rider_user.id,
+                    user_data={},  # Shared data already updated above
+                    role_data=rider_data
                 )
-            logger.info(f"Rider residence_place updated: {rider_data}")
+                
+                if not result["success"]:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=result["message"]
+                    )
+                logger.info(f"Rider residence_place updated: {rider_data}")
         else:
             logger.warning("residence_place update requested but no rider profile found")
     
@@ -295,7 +338,11 @@ async def update_profile(
             )
     
     # Get any profile for response (prefer rider if exists, otherwise first profile)
-    response_user = rider_profile if rider_profile else user_profiles[0]
+    response_user = rider_user if rider_user else user_profiles[0]
+    
+    # Refresh the user data from database to get latest values
+    session.refresh(response_user)
+    
     profile_result = UserService.get_user_with_role_profile(session, response_user.id)
     
     user = profile_result["user"]

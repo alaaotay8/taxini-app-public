@@ -4,13 +4,16 @@ Authentication API endpoints.
 Provides REST API for user authentication including OTP sending, verification, and user info.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
 from typing import Optional
 import logging
+from sqlmodel import Session, select
 
 from src.services.auth import AuthService
 from src.schemas.auth import CurrentUser
+from src.models.user import User
+from src.db.session import get_session
 
 logger = logging.getLogger(__name__)
 
@@ -66,17 +69,18 @@ async def send_otp(request: SendOTPRequest) -> dict:
 
 
 @router.post("/verify-otp")
-async def verify_otp(request: VerifyOTPRequest) -> dict:
+async def verify_otp(request: VerifyOTPRequest, response: Response) -> dict:
     """
-    Verify OTP code and return authentication tokens.
+    Verify OTP code and set HttpOnly authentication cookie.
     
     In development mode, accepts hardcoded OTP "123456".
     
     Args:
         request: Request containing phone number and OTP code
+        response: FastAPI Response object to set cookies
         
     Returns:
-        Authentication tokens and user info
+        User info (token stored in HttpOnly cookie)
     """
     from src.core.settings import settings
     from src.db.session import get_session
@@ -114,6 +118,18 @@ async def verify_otp(request: VerifyOTPRequest) -> dict:
                 }
                 access_token = jwt.encode(token_data, settings.jwt_secret, algorithm=settings.jwt_algorithm)
                 
+                # Set HttpOnly cookie
+                # Development: secure=False, samesite=lax (localhost)
+                # Production: secure=True, samesite=none (cross-origin HTTPS)
+                response.set_cookie(
+                    key="access_token",
+                    value=access_token,
+                    httponly=True,
+                    secure=not settings.development_mode,
+                    samesite="none" if not settings.development_mode else "lax",
+                    max_age=settings.jwt_expiration_minutes * 60
+                )
+                
                 return {
                     "success": True,
                     "message": "Phone number verified successfully",
@@ -123,11 +139,6 @@ async def verify_otp(request: VerifyOTPRequest) -> dict:
                         "email": user.email,
                         "phone": user.phone_number,
                         "role": user.role
-                    },
-                    "session": {
-                        "access_token": access_token,
-                        "token_type": "bearer",
-                        "expires_in": settings.jwt_expiration_minutes * 60
                     }
                 }
         
@@ -147,22 +158,60 @@ async def verify_otp(request: VerifyOTPRequest) -> dict:
 
 
 @router.get("/me")
-async def get_current_user(current_user: CurrentUser = Depends(AuthService.get_current_user_dependency)) -> dict:
+async def get_current_user(
+    current_user: CurrentUser = Depends(AuthService.get_current_user_dependency),
+    session: Session = Depends(get_session)
+) -> dict:
     """
-    Get current authenticated user information.
+    Get current authenticated user information with full profile.
     
     Args:
         current_user: Current authenticated user from dependency
+        session: Database session
         
     Returns:
-        User information
+        User information with name and full profile
     """
     try:
-        return {
-            "success": True,
-            "user": current_user
+        from src.core.settings import settings
+        
+        # Fetch full user profile from database
+        if settings.development_mode:
+            user = session.exec(select(User).where(User.id == current_user.auth_id)).first()
+        else:
+            user = session.exec(select(User).where(User.auth_id == current_user.auth_id)).first()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Build user response with role-specific data
+        user_data = {
+            "auth_id": current_user.auth_id,
+            "user_id": str(user.id),
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone_number,
+            "role": user.role,
+            "auth_status": user.auth_status
         }
         
+        # Add role-specific data (residence for riders)
+        if user.role == "rider":
+            from src.models.user import Rider
+            rider_profile = session.exec(
+                select(Rider).where(Rider.user_id == user.id)
+            ).first()
+            if rider_profile:
+                user_data["residence"] = rider_profile.residence_place
+                user_data["residence_place"] = rider_profile.residence_place
+        
+        return {
+            "success": True,
+            "user": user_data
+        }
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to get current user: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -178,18 +227,19 @@ class RegisterRequest(BaseModel):
 
 
 @router.post("/register")
-async def register(request: RegisterRequest) -> dict:
+async def register(request: RegisterRequest, response: Response) -> dict:
     """
     Register a new user (rider or driver).
     
-    Creates a user account and role-specific profile, then returns JWT token.
+    Creates a user account and role-specific profile, then sets HttpOnly cookie.
     In development mode, automatically logs in without OTP verification.
     
     Args:
         request: Registration data including name, email, phone, role, and role-specific fields
+        response: FastAPI Response object to set cookies
         
     Returns:
-        Authentication tokens and user info
+        User info (token stored in HttpOnly cookie)
     """
     from src.core.settings import settings
     from src.db.session import get_session
@@ -269,6 +319,18 @@ async def register(request: RegisterRequest) -> dict:
             }
             access_token = jwt.encode(token_data, settings.jwt_secret, algorithm=settings.jwt_algorithm)
             
+            # Set HttpOnly cookie
+            # Development: secure=False, samesite=lax (localhost)
+            # Production: secure=True, samesite=none (cross-origin HTTPS)
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=not settings.development_mode,
+                samesite="none" if not settings.development_mode else "lax",
+                max_age=settings.jwt_expiration_minutes * 60
+            )
+            
             return {
                 "success": True,
                 "message": "Registration successful",
@@ -278,11 +340,6 @@ async def register(request: RegisterRequest) -> dict:
                     "email": user.email,
                     "phone": user.phone_number,
                     "role": user.role
-                },
-                "session": {
-                    "access_token": access_token,
-                    "token_type": "bearer",
-                    "expires_in": settings.jwt_expiration_minutes * 60
                 }
             }
         
@@ -290,4 +347,29 @@ async def register(request: RegisterRequest) -> dict:
         raise
     except Exception as e:
         logger.error(f"Failed to register user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/logout")
+async def logout(response: Response) -> dict:
+    """
+    Logout user by clearing the HttpOnly authentication cookie.
+    
+    Returns:
+        Success response
+    """
+    from src.core.settings import settings
+    try:
+        # Clear the HttpOnly cookie with matching settings
+        response.delete_cookie(
+            key="access_token",
+            samesite="none" if not settings.development_mode else "lax"
+        )
+        
+        return {
+            "success": True,
+            "message": "Logged out successfully"
+        }
+    except Exception as e:
+        logger.error(f"Failed to logout: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")

@@ -168,7 +168,7 @@
 /* Map Controls Group */
 .map-controls-group {
   position: absolute;
-  top: 80px;
+  top: 100px;
   right: 10px;
   z-index: 50;
   display: flex;
@@ -308,6 +308,15 @@
   font-weight: 700;
   color: white;
   margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.top-bar-subtitle {
+  font-size: 0.75rem;
+  color: #FFD000;
+  margin: 0;
+  margin-top: 2px;
+  font-weight: 400;
   letter-spacing: 0.02em;
 }
 
@@ -879,22 +888,11 @@
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-  max-height: 85vh;
+  max-height: 70vh;
   overflow-y: auto;
   border-top: 2px solid #FFD000;
   will-change: transform;
   transition: transform 0.3s ease-in-out;
-  padding-bottom: 20px;
-}
-
-@media (min-width: 1024px) {
-  .bottom-sheet {
-    max-width: 500px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 24px;
-    max-height: 75vh;
-  }
 }
 
 .sheet-handle {
@@ -1951,16 +1949,19 @@
   border-radius: 50%;
   background: currentColor;
   animation: statusPulse 2s infinite;
+  box-shadow: 0 0 8px currentColor;
 }
 
 @keyframes statusPulse {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 0 8px currentColor;
   }
   50% {
-    opacity: 0.7;
-    transform: scale(1.2);
+    opacity: 0.8;
+    transform: scale(1.3);
+    box-shadow: 0 0 16px currentColor;
   }
 }
 
@@ -1980,18 +1981,43 @@
   font-size: 1.1rem;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 8px 25px rgba(255, 208, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-toggle-status::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-toggle-status:active::before {
+  width: 300px;
+  height: 300px;
 }
 
 .btn-toggle-status:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 35px rgba(255, 208, 0, 0.5);
+}
+
+.btn-toggle-status:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 6px 20px rgba(255, 208, 0, 0.4);
 }
 
 .btn-toggle-status.offline-mode {
@@ -2239,67 +2265,25 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  backdrop-filter: blur(8px);
 }
 
 .modal-content {
   position: relative;
   background: linear-gradient(135deg, #1a3a2e 0%, #0f2920 100%);
-  border: 2px solid rgba(255, 208, 0, 0.3);
+  border: 1px solid rgba(255, 208, 0, 0.2);
   border-radius: 24px;
   padding: 2rem 1.5rem;
   max-width: 480px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 208, 0, 0.1) inset;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: modalSlideUp 0.3s ease-out;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-}
-
-@media (min-width: 1024px) {
-  .modal-content {
-    max-width: 420px;
-    padding: 1.75rem 1.25rem;
-    max-height: 85vh;
-  }
-}
-
-@media (min-width: 1440px) {
-  .modal-content {
-    max-width: 400px;
-    padding: 1.5rem 1.25rem;
-  }
 }
 
 /* Compact mode for smaller components */
 .modal-content.compact {
-  padding: 1.5rem 1.25rem;
-}
-
-@media (min-width: 1024px) {
-  .modal-content.compact {
-    padding: 1.25rem 1rem;
-    max-width: 380px;
-  }
-}
-
-@media (min-width: 1440px) {
-  .modal-content.compact {
-    max-width: 360px;
-  }
-}
   padding: 1.25rem 1rem;
   max-width: 380px;
 }
@@ -2414,17 +2398,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.8rem;
-  font-weight: 800;
+  transform: translate(-55%, -55%);
+  font-size: 1.2rem;
+  font-weight: 700;
   color: #ffd000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  letter-spacing: -0.5px;
 }
 
 /* Modal Header */
@@ -2434,13 +2411,11 @@
 }
 
 .modal-title {
-  font-size: 1.6rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #ffffff;
   margin: 0;
   letter-spacing: -0.5px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Rider Info Card */
@@ -2448,19 +2423,12 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: linear-gradient(135deg, rgba(26, 58, 46, 0.7), rgba(13, 38, 33, 0.8));
-  border: 2px solid rgba(255, 208, 0, 0.25);
+  background: rgba(26, 58, 46, 0.6);
+  border: 1px solid rgba(255, 208, 0, 0.15);
   border-radius: 16px;
-  padding: 1.25rem;
+  padding: 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.rider-info-card:hover {
-  border-color: rgba(255, 208, 0, 0.4);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .rider-avatar {
@@ -2604,85 +2572,56 @@
 .btn-reject {
   flex: 1;
   padding: 1rem;
-  border: 2px solid #ef4444;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15));
-  color: #ef4444;
-  border-radius: 14px;
+  border: 2px solid #dc2626;
+  background: rgba(26, 58, 46, 0.4);
+  color: #dc2626;
+  border-radius: 12px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
-}
-
-@media (min-width: 1024px) {
-  .btn-reject {
-    padding: 0.875rem;
-    font-size: 0.9rem;
-  }
+  transition: all 0.2s;
 }
 
 .btn-reject:hover {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #dc2626;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-  border-color: #ef4444;
-}
-
-.btn-reject:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 /* Preview Route Button */
 .btn-preview-route {
   width: 100%;
-  padding: 0.875rem 1rem;
-  border: 2px solid #fbbf24;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
-  color: #fbbf24;
-  border-radius: 14px;
-  font-size: 0.9rem;
-  font-weight: 700;
+  padding: 0.75rem 1rem;
+  border: 2px solid #FFC107;
+  background: rgba(255, 193, 7, 0.1);
+  color: #FFC107;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s;
   margin-bottom: 0.75rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  letter-spacing: 0.3px;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
-}
-
-@media (min-width: 1024px) {
-  .btn-preview-route {
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
-  }
 }
 
 .btn-preview-route:hover {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(245, 158, 11, 0.2));
+  background: rgba(255, 193, 7, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(251, 191, 36, 0.3);
-  border-color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 .btn-preview-route.active {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  background: #FFC107;
   color: #0a1f1a;
-  border-color: #fbbf24;
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+  border-color: #FFC107;
 }
 
 .btn-preview-route .btn-icon {
@@ -2741,56 +2680,23 @@
   flex: 2;
   padding: 1rem;
   border: none;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #16a34a, #15803d);
   color: white;
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-accept-large::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.btn-accept-large:hover::before {
-  left: 100%;
-}
-
-@media (min-width: 1024px) {
-  .btn-accept-large {
-    padding: 0.875rem;
-    font-size: 0.9rem;
-  }
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
 }
 
 .btn-accept-large:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
-  background: linear-gradient(135deg, #059669, #047857);
-}
-
-.btn-accept-large:active {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5);
 }
 
 .btn-accept-large:disabled,
@@ -2982,12 +2888,14 @@
 }
 
 .pickup-address-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-left: 4px solid #10b981;
-  border-radius: 16px;
-  padding: 1.125rem;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .address-text {
@@ -3021,11 +2929,12 @@
 }
 
 .fee-display {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-radius: 16px;
-  padding: 1.25rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 18px;
+  padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4), 0 3px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .fee-amount {
@@ -3045,43 +2954,45 @@
 .btn-navigate {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .btn-navigate:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
 }
 
 .btn-start-trip {
   width: 100%;
   padding: 1.125rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .btn-start-trip:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
 }
 
 .btn-start-trip:disabled {
@@ -3093,14 +3004,14 @@
 .btn-cancel-trip {
   width: 100%;
   padding: 0.875rem;
-  background: transparent;
+  background: rgba(239, 68, 68, 0.05);
   color: #ef4444;
-  border: 2px solid #ef4444;
-  border-radius: 12px;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  border-radius: 14px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -3108,8 +3019,9 @@
 .btn-cancel-trip:hover {
   background: #ef4444;
   color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4), 0 3px 10px rgba(0, 0, 0, 0.3);
+  border-color: #ef4444;
 }
 
 /* Confirmation Notification Styles */
@@ -3242,30 +3154,33 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1rem;
 }
 
 .dialog-box {
-  background: #0d2621;
-  border: 2px solid rgba(255, 208, 0, 0.3);
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.98) 100%);
+  border: 2px solid rgba(255, 208, 0, 0.5);
   border-radius: 24px;
-  min-width: 320px;
-  max-width: 90%;
+  min-width: 360px;
+  max-width: 480px;
+  width: 90%;
   max-height: 90vh;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: dialogSlideIn 0.3s ease-out;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 208, 0, 0.2);
+  animation: dialogSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes dialogSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(-30px) scale(0.9);
   }
   to {
     opacity: 1;
@@ -3274,77 +3189,1232 @@
 }
 
 .dialog-header {
-  padding: 24px 24px 16px 24px;
-  border-bottom: 1px solid rgba(255, 208, 0, 0.2);
+  padding: 2rem 1.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 208, 0, 0.25);
+  background: rgba(255, 208, 0, 0.05);
 }
 
 .dialog-title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.625rem;
   font-weight: 700;
   color: #FFD000;
   text-align: center;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 8px rgba(255, 208, 0, 0.3);
 }
 
 .dialog-body {
-  padding: 24px;
+  padding: 2rem 1.75rem;
 }
 
 .dialog-message {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #e5e7eb;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: #f3f4f6;
   text-align: center;
+  font-weight: 500;
 }
 
 .dialog-footer {
-  padding: 16px 24px 24px 24px;
+  padding: 1rem 1.75rem 1.75rem;
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   justify-content: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dialog-btn {
   flex: 1;
-  padding: 14px 24px;
+  padding: 1rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.02em;
+  min-width: 120px;
 }
 
 .dialog-btn-cancel {
-  background: transparent;
-  color: #9ca3af;
-  border: 2px solid #4b5563;
+  background: rgba(107, 114, 128, 0.1);
+  color: #d1d5db;
+  border: 1.5px solid rgba(107, 114, 128, 0.5);
 }
 
 .dialog-btn-cancel:hover {
-  background: #374151;
-  border-color: #6b7280;
-  color: #d1d5db;
-  transform: translateY(-1px);
+  background: rgba(107, 114, 128, 0.2);
+  border-color: rgba(107, 114, 128, 0.7);
+  color: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
 }
 
 .dialog-btn-confirm {
-  background: linear-gradient(135deg, #FFD000, #FFC300);
+  background: linear-gradient(135deg, #FFD000 0%, #FFC300 100%);
   color: #0a1f1a;
   border: none;
-  box-shadow: 0 4px 12px rgba(255, 208, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 208, 0, 0.4);
+  font-weight: 700;
 }
 
 .dialog-btn-confirm:hover {
-  background: linear-gradient(135deg, #FFC300, #FFB700);
+  background: linear-gradient(135deg, #ffed4e 0%, #FFD000 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 208, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(255, 208, 0, 0.5);
 }
 
 .dialog-btn-confirm:active,
 .dialog-btn-cancel:active {
   transform: translateY(0);
+}
+/* ===================================
+   Modern UI Enhancements for Driver Dashboard
+   Professional styling improvements
+   =================================== */
+
+/* Enhanced Header with better depth */
+.driver-header {
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+/* Enhanced status toggle with modern design */
+.status-toggle {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.status-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.status-toggle.online {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Enhanced trip request card */
+.trip-request-card {
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255, 208, 0, 0.4);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced earnings display */
+.earnings-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.earnings-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.earnings-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced rider info card */
+.rider-info-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rider-info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Modern call button enhancement */
+.btn-call {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-call::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-call:hover::before {
+  left: 100%;
+}
+
+.btn-call:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5), 0 3px 10px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+/* Enhanced map controls for driver */
+.driver-map-controls {
+  background: linear-gradient(135deg, rgba(26, 58, 46, 0.98) 0%, rgba(20, 48, 38, 0.98) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced notification badge for driver */
+.driver-notification-badge {
+  background: linear-gradient(135deg, #FFD000 0%, #FFC300 100%);
+  box-shadow: 0 2px 8px rgba(255, 208, 0, 0.4), 0 0 0 2px rgba(10, 31, 26, 0.8);
+  animation: pulse-badge-driver 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge-driver {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 208, 0, 0.4), 0 0 0 2px rgba(10, 31, 26, 0.8);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 208, 0, 0.6), 0 0 0 2px rgba(10, 31, 26, 0.8);
+  }
+}
+
+/* Enhanced trip progress indicator */
+.trip-progress {
+  position: relative;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.trip-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.trip-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Enhanced distance indicator */
+.distance-indicator {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Enhanced timer display */
+.trip-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFD000 0%, #FFC300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 8px rgba(255, 208, 0, 0.3);
+}
+
+/* Enhanced loading states */
+.driver-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.driver-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin-driver 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin-driver {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enhanced success states */
+.success-indicator {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 12px;
+  padding: 1rem;
+  animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced warning states */
+.warning-indicator {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.1) 100%);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  border-radius: 12px;
+  padding: 1rem;
+  animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced scrollbar for driver dashboard */
+.driver-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.driver-container ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.driver-container ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.2) 100%);
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+.driver-container ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.6) 0%, rgba(16, 185, 129, 0.4) 100%);
+}
+
+/* Enhanced transitions */
+.driver-fade-enter-active,
+.driver-fade-leave-active {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.driver-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.driver-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+/* ===================================
+   Additional Driver Dashboard Enhancements
+   Earnings Display, Trip Info, Quick Stats
+   =================================== */
+
+/* Enhanced earnings display with progress bar */
+.earnings-progress-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.earnings-goal-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.earnings-progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.earnings-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.earnings-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: progress-shimmer 2s infinite;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Improved trip info card with better hierarchy */
+.trip-info-enhanced {
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.95) 0%, rgba(10, 31, 26, 0.95) 100%);
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.trip-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.trip-status-badge {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.trip-timer-large {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  background: linear-gradient(135deg, #FFD000 0%, #FFC300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 8px rgba(255, 208, 0, 0.3);
+}
+
+/* Quick stats dashboard */
+.quick-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card-enhanced {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card-enhanced:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.stat-icon {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 0.5rem;
+  color: #10b981;
+}
+
+.stat-value-large {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label-small {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Trip request card with slide-up animation */
+.trip-request-animated {
+  animation: slideUpBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(100px) scale(0.9);
+  }
+  60% {
+    transform: translateY(-10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Rider info preview enhancement */
+.rider-info-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(255, 208, 0, 0.1) 0%, rgba(255, 208, 0, 0.05) 100%);
+  border: 1px solid rgba(255, 208, 0, 0.2);
+  border-radius: 14px;
+  margin-bottom: 1rem;
+}
+
+.rider-rating-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  background: rgba(255, 208, 0, 0.2);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #FFD000;
+}
+
+.rider-trip-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.25rem;
+}
+
+/* Earnings breakdown display */
+.earnings-breakdown {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.breakdown-row:last-child {
+  border-bottom: none;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  border-top: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.breakdown-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.breakdown-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+
+.breakdown-total {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+/* Accept/Decline swipe gestures visual feedback */
+.swipe-action-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  opacity: 0.6;
+  animation: swipe-hint 2s ease-in-out infinite;
+}
+
+@keyframes swipe-hint {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+.swipe-arrow {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Enhanced button interactions */
+.btn-accept-trip,
+.btn-decline-trip {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-accept-trip::before,
+.btn-decline-trip::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-accept-trip:active::before,
+.btn-decline-trip:active::before {
+  width: 400px;
+  height: 400px;
+}
+
+.btn-accept-trip:active,
+.btn-decline-trip:active {
+  transform: scale(0.96);
+}
+
+/* Loading state for navigation */
+.navigation-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.nav-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nav-loading-text {
+  font-size: 0.875rem;
+  color: #3b82f6;
+  font-weight: 600;
+}
+/* ===================================
+   Desktop/PC Responsive Optimizations for Driver Dashboard
+   For screens 1024px and above
+   =================================== */
+
+/* Constrain dashboard and optimize layout */
+@media (min-width: 1024px) {
+  .driver-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Waiting for trips panel - position on right side */
+  .waiting-panel,
+  .driver-stats-panel {
+    position: fixed;
+    right: 0;
+    top: 72px;
+    width: 400px;
+    max-width: 400px;
+    height: calc(100vh - 72px);
+    background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    border-left: 2px solid rgba(16, 185, 129, 0.3);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    overflow-y: auto;
+    z-index: 40;
+  }
+
+  /* Map takes remaining space */
+  .map-container {
+    right: 400px;
+    width: calc(100% - 400px);
+  }
+
+  /* Map controls - adjust position */
+  .map-controls-group {
+    right: 420px;
+  }
+
+  /* Top bar - full width */
+  .top-bar {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Stats cards - better grid on desktop */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  /* Status toggle - better spacing */
+  .status-toggle-container {
+    margin-top: 2rem;
+  }
+
+  /* Trip request modal - center on screen */
+  .trip-request-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    max-width: 600px;
+    width: 90%;
+  }
+
+  /* Trip info card - better layout */
+  .trip-info-card {
+    max-width: 100%;
+  }
+
+  /* Notification panel - adjust position */
+  .notification-panel {
+    right: 410px;
+    width: 400px;
+  }
+
+  /* Side menu - adjust for desktop */
+  .side-menu {
+    width: 350px;
+  }
+}
+
+/* Extra large screens (1440px+) */
+@media (min-width: 1440px) {
+  .driver-container {
+    max-width: 1600px;
+  }
+
+  .waiting-panel,
+  .driver-stats-panel {
+    width: 450px;
+    max-width: 450px;
+  }
+
+  .map-container {
+    right: 450px;
+    width: calc(100% - 450px);
+  }
+
+  .map-controls-group {
+    right: 470px;
+  }
+
+  .notification-panel {
+    right: 460px;
+  }
+
+  /* Larger stats cards */
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+}
+
+/* Ultra wide screens (1920px+) */
+@media (min-width: 1920px) {
+  .driver-container {
+    max-width: 1800px;
+  }
+
+  .waiting-panel,
+  .driver-stats-panel {
+    width: 500px;
+    max-width: 500px;
+    padding: 2.5rem;
+  }
+
+  .map-container {
+    right: 500px;
+    width: calc(100% - 500px);
+  }
+
+  .map-controls-group {
+    right: 520px;
+  }
+
+  .notification-panel {
+    right: 510px;
+    width: 450px;
+  }
+
+  /* Larger text and spacing */
+  .waiting-panel h2,
+  .driver-stats-panel h2 {
+    font-size: 1.75rem;
+  }
+
+  .stat-card {
+    padding: 2rem;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+  }
+
+  .btn-toggle-status {
+    padding: 1.5rem 2.5rem;
+    font-size: 1.25rem;
+  }
+}
+
+/* Landscape tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .driver-container {
+    max-width: 100%;
+  }
+
+  /* Stats in horizontal layout */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Adjust modal size */
+  .modal-content {
+    max-width: 500px;
+  }
+
+  /* Map controls */
+  .map-controls-group {
+    right: 20px;
+  }
+}
+/* ===================================
+   Desktop/Large Screen Optimizations
+   Driver Dashboard - Professional Layout
+   =================================== */
+
+/* Desktop Layout (1024px+) - Optimized for large screens */
+@media (min-width: 1024px) {
+  /* Main container with max-width */
+  .driver-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* Compact waiting card */
+  .waiting-card,
+  .driver-dashboard-card {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 450px !important;
+    max-width: 450px !important;
+    padding: 1.25rem !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  /* Compact stats grid */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.625rem !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .stat-card {
+    padding: 0.75rem !important;
+  }
+  
+  .stat-value {
+    font-size: 1.25rem !important;
+  }
+  
+  .stat-label {
+    font-size: 0.6875rem !important;
+  }
+  
+  .stat-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  /* Compact status toggle */
+  .status-toggle-container {
+    margin-top: 1rem !important;
+    gap: 0.875rem !important;
+  }
+  
+  .status-indicator {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .status-dot {
+    width: 10px !important;
+    height: 10px !important;
+  }
+  
+  .btn-toggle-status {
+    max-width: 260px !important;
+    padding: 0.875rem 1.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact trip request modal */
+  .trip-request-modal .modal-content {
+    width: 480px !important;
+    max-width: 480px !important;
+    padding: 1.25rem !important;
+    max-height: calc(100vh - 100px) !important;
+    overflow-y: auto !important;
+  }
+  
+  .countdown-timer {
+    margin-bottom: 1rem !important;
+  }
+  
+  .countdown-circle {
+    width: 56px !important;
+    height: 56px !important;
+  }
+  
+  .countdown-circle svg {
+    width: 56px !important;
+    height: 56px !important;
+  }
+  
+  .countdown-text {
+    font-size: 1rem !important;
+  }
+  
+  /* Compact rider info */
+  .rider-info,
+  .trip-request-modal .rider-info {
+    padding: 0.75rem !important;
+    margin-bottom: 0.875rem !important;
+  }
+  
+  .rider-name {
+    font-size: 0.9375rem !important;
+  }
+  
+  .rider-rating {
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Compact location details */
+  .location-detail {
+    padding: 0.625rem !important;
+    margin-bottom: 0.625rem !important;
+  }
+  
+  .location-label {
+    font-size: 0.6875rem !important;
+  }
+  
+  .location-address {
+    font-size: 0.8125rem !important;
+  }
+  
+  .location-distance {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Compact earnings display */
+  .earnings-display {
+    padding: 0.75rem !important;
+    margin-bottom: 0.875rem !important;
+  }
+  
+  .earnings-label {
+    font-size: 0.6875rem !important;
+  }
+  
+  .earnings-value {
+    font-size: 1.125rem !important;
+  }
+  
+  .trip-distance {
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Compact action buttons */
+  .modal-actions {
+    gap: 0.625rem !important;
+    margin-top: 1rem !important;
+  }
+  
+  .btn-reject,
+  .btn-accept-large {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact trip info card */
+  .trip-info-card {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 480px !important;
+    max-width: 480px !important;
+    padding: 1.125rem !important;
+    border-radius: 16px !important;
+  }
+  
+  .trip-section {
+    padding: 0.625rem !important;
+    margin-bottom: 0.625rem !important;
+  }
+  
+  .trip-section h4 {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .trip-section p {
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Compact trip actions */
+  .trip-actions {
+    gap: 0.625rem !important;
+    margin-top: 0.875rem !important;
+  }
+  
+  .btn-start-trip,
+  .btn-complete-trip,
+  .btn-cancel-trip {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact map controls */
+  .map-controls-group {
+    top: 90px !important;
+    right: 20px !important;
+  }
+  
+  .map-control-btn {
+    width: 42px !important;
+    height: 42px !important;
+  }
+  
+  .map-control-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Compact header */
+  .top-bar {
+    padding: 0.75rem 1.5rem !important;
+  }
+  
+  .top-bar-title h1 {
+    font-size: 1rem !important;
+  }
+  
+  .top-bar-subtitle {
+    font-size: 0.625rem !important;
+  }
+  
+  .btn-hamburger,
+  .btn-notification {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .btn-hamburger svg,
+  .btn-notification svg {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+}
+
+/* Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+  .driver-container {
+    max-width: 1600px;
+  }
+  
+  .waiting-card,
+  .driver-dashboard-card {
+    width: 500px !important;
+    max-width: 500px !important;
+    padding: 1.5rem !important;
+    bottom: 40px !important;
+  }
+  
+  .trip-request-modal .modal-content {
+    width: 520px !important;
+    max-width: 520px !important;
+    padding: 1.5rem !important;
+  }
+  
+  .trip-info-card {
+    width: 520px !important;
+    max-width: 520px !important;
+    padding: 1.25rem !important;
+    bottom: 40px !important;
+  }
+  
+  .stat-card {
+    padding: 0.875rem !important;
+  }
+  
+  .stat-value {
+    font-size: 1.375rem !important;
+  }
+  
+  .btn-toggle-status {
+    max-width: 300px !important;
+    padding: 1rem 1.75rem !important;
+    font-size: 0.9375rem !important;
+  }
+}
+
+/* Ultra Wide (1920px+) */
+@media (min-width: 1920px) {
+  .driver-container {
+    max-width: 1800px;
+  }
+  
+  .waiting-card,
+  .driver-dashboard-card {
+    width: 550px !important;
+    max-width: 550px !important;
+    bottom: 50px !important;
+  }
+  
+  .trip-request-modal .modal-content {
+    width: 560px !important;
+    max-width: 560px !important;
+  }
+  
+  .trip-info-card {
+    width: 560px !important;
+    max-width: 560px !important;
+    bottom: 50px !important;
+  }
+  
+  .map-controls-group {
+    right: 25px !important;
+  }
 }

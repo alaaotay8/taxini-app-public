@@ -136,25 +136,26 @@ a[title="Mapbox logo"] {
   position: absolute;
   top: 20px;
   right: 10px;
-  z-index: 50;
+  z-index: 30;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .map-control-btn {
-  width: 40px;
-  height: 40px;
-  background: rgba(26, 58, 46, 0.95);
-  backdrop-filter: blur(10px);
-  border: none;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, rgba(26, 58, 46, 0.98) 0%, rgba(20, 48, 38, 0.98) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .map-control-btn svg {
@@ -164,9 +165,10 @@ a[title="Mapbox logo"] {
 }
 
 .map-control-btn:hover {
-  background: rgba(26, 58, 46, 1);
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(26, 58, 46, 1) 100%);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(34, 197, 94, 0.4);
 }
 
 .map-control-btn:active {
@@ -199,23 +201,25 @@ a[title="Mapbox logo"] {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFD000 0%, #FFA500 100%);
+  background: linear-gradient(135deg, #FFD000 0%, #FFC300 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 25;
-  box-shadow: 0 8px 24px rgba(255, 208, 0, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(255, 208, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   animation: subtle-pulse 2s ease-in-out infinite;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .show-sheet-btn:hover {
-  transform: translateX(-50%) scale(1.1);
-  box-shadow: 0 12px 32px rgba(255, 208, 0, 0.5);
+  transform: translateX(-50%) translateY(-3px) scale(1.08);
+  box-shadow: 0 12px 36px rgba(255, 208, 0, 0.6), 0 6px 16px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .show-sheet-btn svg {
@@ -265,12 +269,13 @@ a[title="Mapbox logo"] {
 }
 
 .confirmation-card {
-  background: rgba(10, 31, 26, 0.98);
-  backdrop-filter: blur(16px);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 208, 0, 0.3);
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 208, 0, 0.4);
 }
 
 .confirmation-header {
@@ -358,6 +363,188 @@ a[title="Mapbox logo"] {
 .slide-fade-leave-to {
   transform: translateX(-20px);
   opacity: 0;
+}
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.side-menu {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 85%;
+  max-width: 320px;
+  background: linear-gradient(180deg, #1a3a2e 0%, #0f2419 100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: slide-in-left 0.3s ease-out;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.menu-header {
+  background: linear-gradient(135deg, rgba(255, 208, 0, 0.15), rgba(255, 208, 0, 0.05));
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 208, 0, 0.2);
+}
+
+.user-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD000, #ff8800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(255, 208, 0, 0.4);
+}
+
+.avatar-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0a1f1a;
+}
+
+.user-info {
+  color: white;
+}
+
+.user-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: white;
+}
+
+.user-phone {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.btn-edit-profile {
+  width: calc(100% - 3rem);
+  margin: 1.5rem 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #FFD000, #ff8800);
+  border: none;
+  border-radius: 12px;
+  color: #0a1f1a;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(255, 208, 0, 0.3);
+}
+
+.btn-edit-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 208, 0, 0.5);
+}
+
+.btn-edit-profile:active {
+  transform: translateY(0);
+}
+
+.menu-items {
+  flex: 1;
+  padding: 0.5rem 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.menu-item:hover {
+  background: rgba(255, 208, 0, 0.1);
+  padding-left: 2rem;
+}
+
+.menu-item:active {
+  background: rgba(255, 208, 0, 0.2);
+}
+
+.menu-item-icon {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.menu-item:hover .menu-item-icon {
+  stroke: #FFD000;
+}
+
+.menu-item-text {
+  flex: 1;
+  letter-spacing: 0.02em;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: calc(100% - 3rem);
+  margin: 1.5rem;
+  padding: 1rem;
+  background: transparent;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  border-radius: 12px;
+  color: #ef4444;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+.btn-logout:active {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.logout-text {
+  letter-spacing: 0.05em;
 }
 
 /* ===================================
@@ -1023,22 +1210,29 @@ a[title="Mapbox logo"] {
    Dynamic Driver Cards Animations
    =================================== */
 
-/* Slide-in animation for driver cards */
+/* Slide-in animation for driver cards with stagger effect */
 @keyframes slideInFromLeft {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-30px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
   }
 }
 
 .driver-card {
   opacity: 0;
-  animation: slideInFromLeft 0.4s ease-out forwards;
+  animation: slideInFromLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* Stagger effect - each card delays slightly */
+.driver-card:nth-child(1) { animation-delay: 0.05s; }
+.driver-card:nth-child(2) { animation-delay: 0.1s; }
+.driver-card:nth-child(3) { animation-delay: 0.15s; }
+.driver-card:nth-child(4) { animation-delay: 0.2s; }
+.driver-card:nth-child(5) { animation-delay: 0.25s; }
 
 /* Driver card container transitions */
 .driver-cards-container {
@@ -1153,5 +1347,833 @@ a[title="Mapbox logo"] {
   
   .driver-card:hover {
     transform: scale(1.03);
+  }
+}
+/* ===================================
+   Modern UI Enhancements for Rider Dashboard
+   Professional styling improvements
+   =================================== */
+
+/* Enhanced Header with better depth */
+.rider-header {
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 208, 0, 0.15);
+}
+
+/* Improved Bottom Sheet with modern glassmorphism */
+.bottom-sheet {
+  background: linear-gradient(135deg, rgba(13, 38, 33, 0.98) 0%, rgba(10, 31, 26, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4), 0 -4px 16px rgba(0, 0, 0, 0.2);
+  border-top: 1.5px solid rgba(255, 208, 0, 0.2);
+}
+
+/* Enhanced input fields with better focus states */
+.search-input,
+.location-input {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 0.875rem 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus,
+.location-input:focus {
+  border-color: rgba(255, 208, 0, 0.6);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+  box-shadow: 0 4px 16px rgba(255, 208, 0, 0.2), 0 0 0 3px rgba(255, 208, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Modern button styles with better interactions */
+.btn-primary {
+  background: linear-gradient(135deg, #FFD000 0%, #FFC300 100%);
+  border: none;
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  color: #0a1f1a;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(255, 208, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(255, 208, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #ffed4e 0%, #FFD000 100%);
+}
+
+.btn-primary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 208, 0, 0.4);
+}
+
+/* Enhanced card components */
+.info-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 208, 0, 0.3);
+}
+
+/* Smooth loading states */
+.loading-spinner {
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enhanced notification badge */
+.notification-badge {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 0 2px rgba(10, 31, 26, 0.8);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 0 2px rgba(10, 31, 26, 0.8);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6), 0 0 0 2px rgba(10, 31, 26, 0.8);
+  }
+}
+
+/* Improved status indicators */
+.status-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+/* Enhanced scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(255, 208, 0, 0.4) 0%, rgba(255, 208, 0, 0.2) 100%);
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(255, 208, 0, 0.6) 0%, rgba(255, 208, 0, 0.4) 100%);
+}
+
+/* Modern skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Enhanced transitions for route changes */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Slide transitions */
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* Enhanced ripple effect for interactive elements */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+/* ===================================
+   Additional UI Enhancements
+   Button Press Feedback & Micro-interactions
+   =================================== */
+
+/* Enhanced button press feedback for all primary buttons */
+.btn-primary,
+.btn-select-driver,
+.btn-confirm-trip,
+button[class*="btn-"] {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after,
+.btn-select-driver::after,
+.btn-confirm-trip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::after,
+.btn-select-driver:active::after,
+.btn-confirm-trip:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-primary:active,
+.btn-select-driver:active,
+.btn-confirm-trip:active {
+  transform: scale(0.97);
+}
+
+/* Skeleton loading states */
+.skeleton-card {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 18px;
+  height: 120px;
+  margin-bottom: 12px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-text {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.15) 50%, 
+    rgba(255, 255, 255, 0.08) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.large {
+  height: 24px;
+  width: 60%;
+}
+
+.skeleton-text.medium {
+  height: 18px;
+  width: 80%;
+}
+
+.skeleton-text.small {
+  height: 14px;
+  width: 40%;
+}
+
+/* Enhanced "Where to?" section with gradient */
+.bottom-sheet {
+  background: linear-gradient(135deg, 
+    rgba(13, 38, 33, 0.98) 0%, 
+    rgba(10, 31, 26, 0.98) 50%,
+    rgba(13, 38, 33, 0.98) 100%);
+}
+
+/* Improved destination confirmation with icons */
+.destination-icon {
+  width: 24px;
+  height: 24px;
+  color: #FFD000;
+  animation: icon-bounce 0.6s ease-out;
+}
+
+@keyframes icon-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Real-time driver location pulse */
+.driver-marker-pulse {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 208, 0, 0.3);
+  animation: marker-pulse 2s ease-out infinite;
+}
+
+@keyframes marker-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Enhanced error states */
+.error-state {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.error-icon {
+  width: 48px;
+  height: 48px;
+  color: #ef4444;
+  margin: 0 auto 1rem;
+  animation: error-bounce 0.6s ease-out;
+}
+
+@keyframes error-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.retry-button:active {
+  transform: scale(0.95);
+}
+
+/* Icon animations on hover */
+.icon-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-hover:hover {
+  transform: rotate(10deg) scale(1.1);
+}
+
+/* Smooth page transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+/* ===================================
+   Desktop/PC Responsive Optimizations
+   For screens 1024px and above
+   =================================== */
+
+/* Constrain dashboard to max width and center */
+@media (min-width: 1024px) {
+  .rider-dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* Bottom sheet - constrain width and position on right side */
+  .bottom-sheet {
+    position: fixed;
+    right: 0;
+    left: auto;
+    width: 450px;
+    max-width: 450px;
+    height: 100vh;
+    top: 0;
+    bottom: auto;
+    border-radius: 0;
+    border-left: 2px solid rgba(255, 208, 0, 0.3);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Map takes remaining space */
+  .map-wrapper {
+    right: 450px;
+    width: calc(100% - 450px);
+  }
+
+  /* Header - full width at top */
+  .rider-dashboard > div:first-child {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Bottom sheet content padding */
+  .bottom-sheet > div {
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+
+  /* Driver cards - better spacing on desktop */
+  .driver-cards-container {
+    max-height: calc(100vh - 400px);
+  }
+
+  /* Action buttons - better layout */
+  .bottom-sheet button {
+    max-width: 100%;
+  }
+
+  /* Show sheet button - hide on desktop since sheet is always visible */
+  .show-sheet-btn {
+    display: none;
+  }
+
+  /* Map controls - adjust position for desktop */
+  .map-controls-group {
+    right: 470px;
+  }
+
+  /* Destination confirmation - adjust for desktop */
+  .destination-confirmation {
+    right: 470px;
+    left: auto;
+    transform: translateX(0);
+  }
+
+  /* Notification panel - adjust for desktop */
+  .notification-panel {
+    right: 460px;
+    width: 400px;
+  }
+}
+
+/* Extra large screens (1440px+) */
+@media (min-width: 1440px) {
+  .rider-dashboard {
+    max-width: 1600px;
+  }
+
+  .bottom-sheet {
+    width: 500px;
+    max-width: 500px;
+  }
+
+  .map-wrapper {
+    right: 500px;
+    width: calc(100% - 500px);
+  }
+
+  .map-controls-group {
+    right: 520px;
+  }
+
+  .destination-confirmation {
+    right: 520px;
+  }
+
+  .notification-panel {
+    right: 510px;
+  }
+}
+
+/* Ultra wide screens (1920px+) */
+@media (min-width: 1920px) {
+  .rider-dashboard {
+    max-width: 1800px;
+  }
+
+  .bottom-sheet {
+    width: 550px;
+    max-width: 550px;
+  }
+
+  .map-wrapper {
+    right: 550px;
+    width: calc(100% - 550px);
+  }
+
+  .map-controls-group {
+    right: 570px;
+  }
+
+  .destination-confirmation {
+    right: 570px;
+  }
+
+  .notification-panel {
+    right: 560px;
+    width: 450px;
+  }
+
+  /* Larger text and spacing for ultra wide */
+  .bottom-sheet h1,
+  .bottom-sheet h2 {
+    font-size: 1.75rem;
+  }
+
+  .driver-card {
+    padding: 1.5rem;
+  }
+}
+/* ===================================
+   Desktop/Large Screen Optimizations
+   Rider Dashboard - Professional Layout
+   =================================== */
+
+/* Desktop Layout (1024px+) - Optimized for large screens */
+@media (min-width: 1024px) {
+  /* Main container with max-width */
+  .rider-dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* Bottom sheet as compact sidebar on right */
+  .bottom-sheet {
+    position: fixed !important;
+    right: 30px !important;
+    left: auto !important;
+    bottom: 30px !important;
+    top: 100px !important;
+    width: 380px !important;
+    max-width: 380px !important;
+    height: auto !important;
+    max-height: calc(100vh - 150px) !important;
+    transform: translateY(0) !important;
+    border-radius: 16px !important;
+    border: 2px solid rgba(255, 208, 0, 0.25) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+    overflow-y: auto !important;
+    z-index: 100 !important;
+  }
+  
+  .bottom-sheet.collapsed {
+    transform: translateX(450px) !important;
+  }
+  
+  .bottom-sheet.expanded {
+    transform: translateY(0) !important;
+  }
+  
+  /* Compact all content inside bottom sheet */
+  .bottom-sheet > div,
+  .bottom-sheet .px-6 {
+    padding: 1rem !important;
+  }
+  
+  .bottom-sheet h2 {
+    font-size: 1.125rem !important;
+    margin-bottom: 0.625rem !important;
+  }
+  
+  .bottom-sheet p {
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Compact inputs */
+  .bottom-sheet input,
+  .bottom-sheet .location-input,
+  .bottom-sheet .search-input {
+    padding: 0.625rem 0.75rem !important;
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Compact buttons */
+  .bottom-sheet button {
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Compact driver cards */
+  .bottom-sheet .driver-card {
+    padding: 0.75rem !important;
+    margin-bottom: 0.625rem !important;
+  }
+  
+  .bottom-sheet .driver-card .w-16 {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+  }
+  
+  .bottom-sheet .driver-card h3 {
+    font-size: 0.875rem !important;
+  }
+  
+  .bottom-sheet .driver-card p,
+  .bottom-sheet .driver-card span {
+    font-size: 0.75rem !important;
+  }
+  
+  .bottom-sheet .driver-card svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+  
+  /* Compact labels */
+  .bottom-sheet .text-xs {
+    font-size: 0.6875rem !important;
+  }
+  
+  .bottom-sheet .text-sm {
+    font-size: 0.75rem !important;
+  }
+  
+  .bottom-sheet .text-base {
+    font-size: 0.8125rem !important;
+  }
+  
+  .bottom-sheet .text-lg {
+    font-size: 0.9375rem !important;
+  }
+  
+  /* Show sheet toggle button */
+  .show-sheet-btn {
+    position: fixed !important;
+    right: 30px !important;
+    bottom: 30px !important;
+    width: 52px !important;
+    height: 52px !important;
+    z-index: 99 !important;
+  }
+  
+  /* Compact map controls */
+  .map-controls-group {
+    top: 100px !important;
+    right: 20px !important;
+  }
+  
+  .map-control-btn {
+    width: 42px !important;
+    height: 42px !important;
+  }
+  
+  .map-control-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Compact header */
+  .rider-dashboard > .bg-taxini-dark-light {
+    padding: 0.75rem 1.5rem !important;
+  }
+  
+  .rider-dashboard > .bg-taxini-dark-light h1 {
+    font-size: 1rem !important;
+  }
+  
+  .rider-dashboard > .bg-taxini-dark-light p {
+    font-size: 0.625rem !important;
+  }
+  
+  .rider-dashboard > .bg-taxini-dark-light svg {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+}
+
+/* Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+  .rider-dashboard {
+    max-width: 1600px;
+  }
+  
+  .bottom-sheet {
+    width: 420px !important;
+    max-width: 420px !important;
+    right: 40px !important;
+    bottom: 40px !important;
+  }
+  
+  .show-sheet-btn {
+    right: 40px !important;
+    bottom: 40px !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+  
+  .bottom-sheet h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  .bottom-sheet input,
+  .bottom-sheet button {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Ultra Wide (1920px+) */
+@media (min-width: 1920px) {
+  .rider-dashboard {
+    max-width: 1800px;
+  }
+  
+  .bottom-sheet {
+    width: 460px !important;
+    max-width: 460px !important;
+    right: 50px !important;
+    bottom: 50px !important;
+  }
+  
+  .show-sheet-btn {
+    right: 50px !important;
+    bottom: 50px !important;
   }
 }

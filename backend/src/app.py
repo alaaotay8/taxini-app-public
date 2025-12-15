@@ -34,9 +34,10 @@ allowed_origins = settings.get_allowed_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=True,  # Enable HttpOnly cookies
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Explicit methods
-    allow_headers=["Authorization", "Content-Type", "X-API-Key"],  # Explicit headers
+    allow_headers=["Authorization", "Content-Type", "X-API-Key", "Cookie"],  # Include Cookie header
+    expose_headers=["Set-Cookie"],  # Expose Set-Cookie to frontend
     max_age=600,  # Cache preflight for 10 minutes
 )
 

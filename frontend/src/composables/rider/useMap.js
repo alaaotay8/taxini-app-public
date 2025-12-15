@@ -15,6 +15,8 @@ export function useMap() {
   const map = ref(null)
   const userMarker = ref(null)
   const destinationMarker = ref(null)
+  const pickupMarker = ref(null)
+  const driverMarker = ref(null)
   const routeLayer = ref(null)
 
   const userLocation = ref({
@@ -265,10 +267,149 @@ export function useMap() {
   }
 
   /**
-   * Draw route on map from user location to destination
+   * Add pickup marker (pink pin) at specified location
    */
-  const drawRoute = async (destinationLng, destinationLat) => {
-    console.log('🚗 drawRoute called with:', { destinationLng, destinationLat })
+  const addPickupMarker = (lat, lng) => {
+    if (!map.value) return
+    
+    // Remove existing pickup marker
+    if (pickupMarker.value) {
+      pickupMarker.value.remove()
+    }
+    
+    const el = document.createElement('div')
+    el.innerHTML = '📍'
+    el.style.fontSize = '32px'
+    el.style.cursor = 'pointer'
+    el.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+    
+    pickupMarker.value = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([lng, lat])
+      .addTo(map.value)
+    
+    console.log('📍 Pickup marker added at:', lat, lng)
+  }
+  
+  /**
+   * Remove pickup marker
+   */
+  const removePickupMarker = () => {
+    if (pickupMarker.value) {
+      pickupMarker.value.remove()
+      pickupMarker.value = null
+    }
+  }
+  
+  /**
+   * Add destination marker (checkered flag) at specified location
+   */
+  const addDestinationMarkerFlag = (lat, lng) => {
+    if (!map.value) return
+    
+    // Remove existing destination marker
+    if (destinationMarker.value) {
+      destinationMarker.value.remove()
+    }
+    
+    const el = document.createElement('div')
+    el.innerHTML = '🏁'
+    el.style.fontSize = '32px'
+    el.style.cursor = 'pointer'
+    el.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+    
+    destinationMarker.value = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([lng, lat])
+      .addTo(map.value)
+    
+    console.log('🏁 Destination marker added at:', lat, lng)
+  }
+  
+  /**
+   * Add driver marker (taxi emoji) at specified location
+   */
+  const addDriverMarker = (lat, lng) => {
+    if (!map.value) return
+    
+    // Remove existing driver marker
+    if (driverMarker.value) {
+      driverMarker.value.remove()
+    }
+    
+    const el = document.createElement('div')
+    el.innerHTML = '🚕'
+    el.style.fontSize = '32px'
+    el.style.cursor = 'pointer'
+    el.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+    
+    driverMarker.value = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([lng, lat])
+      .addTo(map.value)
+    
+    console.log('🚕 Driver marker added at:', lat, lng)
+  }
+  
+  /**
+   * Update driver marker position
+   */
+  const updateDriverMarker = (lat, lng) => {
+    if (driverMarker.value) {
+      driverMarker.value.setLngLat([lng, lat])
+    } else {
+      addDriverMarker(lat, lng)
+    }
+  }
+  
+  /**
+   * Remove driver marker
+   */
+  const removeDriverMarker = () => {
+    if (driverMarker.value) {
+      driverMarker.value.remove()
+      driverMarker.value = null
+    }
+  }
+  
+  /**
+   * Fit map to show all markers (pickup, destination, driver)
+   */
+  const fitMapToMarkers = () => {
+    if (!map.value) return
+    
+    const bounds = new mapboxgl.LngLatBounds()
+    let hasMarkers = false
+    
+    if (pickupMarker.value) {
+      bounds.extend(pickupMarker.value.getLngLat())
+      hasMarkers = true
+    }
+    if (destinationMarker.value) {
+      bounds.extend(destinationMarker.value.getLngLat())
+      hasMarkers = true
+    }
+    if (driverMarker.value) {
+      bounds.extend(driverMarker.value.getLngLat())
+      hasMarkers = true
+    }
+    if (userMarker.value) {
+      bounds.extend(userMarker.value.getLngLat())
+      hasMarkers = true
+    }
+    
+    if (hasMarkers) {
+      map.value.fitBounds(bounds, {
+        padding: { top: 80, bottom: 380, left: 80, right: 80 },
+        duration: 1000,
+        maxZoom: 16
+      })
+    }
+  }
+
+  /**
+   * Draw route on map with specific route type
+   * routeType: 'approach' (blue: driver->pickup), 'trip' (yellow: pickup->destination)
+   */
+  const drawRoute = async (destinationLng, destinationLat, routeType = 'trip') => {
+    console.log('🚗 drawRoute called with:', { destinationLng, destinationLat, routeType })
     console.log('📍 User location:', userLocation.value)
     console.log('🗺️ Map exists:', !!map.value)
     
@@ -278,12 +419,15 @@ export function useMap() {
     }
 
     try {
-      // Remove existing route if any
-      if (map.value.getLayer('route')) {
-        map.value.removeLayer('route')
+      const layerId = routeType === 'approach' ? 'route-approach' : 'route-trip'
+      const routeColor = routeType === 'approach' ? '#3B82F6' : '#FFD000' // Blue for approach, Yellow for trip
+      
+      // Remove existing route of this type if any
+      if (map.value.getLayer(layerId)) {
+        map.value.removeLayer(layerId)
       }
-      if (map.value.getSource('route')) {
-        map.value.removeSource('route')
+      if (map.value.getSource(layerId)) {
+        map.value.removeSource(layerId)
       }
 
       // Fetch route from Mapbox Directions API
@@ -294,35 +438,36 @@ export function useMap() {
       const response = await fetch(url)
       const data = await response.json()
       
-      console.log('🛣️ Route data received:', data)
+      console.log(`🛣️ Route data received (${routeType}):`, data)
 
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0].geometry
-        console.log('✅ Route geometry:', route)
+        const distance = (data.routes[0].distance / 1000).toFixed(2) // km
+        console.log(`✅ Route geometry (${routeType}): ${distance} km`)
 
         // Add route source
-        map.value.addSource('route', {
+        map.value.addSource(layerId, {
           type: 'geojson',
           data: {
             type: 'Feature',
-            properties: {},
+            properties: { distance: data.routes[0].distance, routeType },
             geometry: route
           }
         })
 
         // Add route layer
         map.value.addLayer({
-          id: 'route',
+          id: layerId,
           type: 'line',
-          source: 'route',
+          source: layerId,
           layout: {
             'line-join': 'round',
             'line-cap': 'round'
           },
           paint: {
-            'line-color': '#FFD000',
+            'line-color': routeColor,
             'line-width': 5,
-            'line-opacity': 0.8
+            'line-opacity': 0.85
           }
         })
 
@@ -333,29 +478,124 @@ export function useMap() {
         }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]))
 
         map.value.fitBounds(bounds, {
-          padding: { top: 100, bottom: 380, left: 50, right: 50 }, // Extra bottom padding for card
+          padding: { top: 100, bottom: 380, left: 50, right: 50 },
           duration: 1000,
-          // allow route to zoom in a bit to show more detail
           maxZoom: 16
         })
+        
+        return { distance, duration: data.routes[0].duration }
       }
     } catch (error) {
       console.error('Error drawing route:', error)
     }
   }
+  
+  /**
+   * Draw both routes: approach (blue) from driver to pickup, trip (yellow) from pickup to destination
+   */
+  const drawBothRoutes = async (driverLocation, pickupLocation, destinationLocation) => {
+    if (!map.value) return
+    
+    // Draw approach route (driver -> pickup) in blue
+    await drawRouteFromTo(driverLocation, pickupLocation, 'approach')
+    
+    // Draw trip route (pickup -> destination) in yellow
+    await drawRouteFromTo(pickupLocation, destinationLocation, 'trip')
+    
+    console.log('🗺️ Both routes drawn: blue (driver->pickup) + yellow (pickup->destination)')
+  }
+  
+  /**
+   * Draw route between two arbitrary points
+   */
+  const drawRouteFromTo = async (origin, destination, routeType = 'trip') => {
+    if (!map.value) return
+    
+    try {
+      const layerId = routeType === 'approach' ? 'route-approach' : 'route-trip'
+      const routeColor = routeType === 'approach' ? '#3B82F6' : '#FFD000'
+      
+      // Remove existing route of this type
+      if (map.value.getLayer(layerId)) {
+        map.value.removeLayer(layerId)
+      }
+      if (map.value.getSource(layerId)) {
+        map.value.removeSource(layerId)
+      }
+      
+      const start = `${origin.lng},${origin.lat}`
+      const end = `${destination.lng},${destination.lat}`
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start};${end}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+      
+      const response = await fetch(url)
+      const data = await response.json()
+      
+      if (data.routes && data.routes.length > 0) {
+        const route = data.routes[0].geometry
+        
+        map.value.addSource(layerId, {
+          type: 'geojson',
+          data: { type: 'Feature', properties: {}, geometry: route }
+        })
+        
+        map.value.addLayer({
+          id: layerId,
+          type: 'line',
+          source: layerId,
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': routeColor, 'line-width': 5, 'line-opacity': 0.85 }
+        })
+        
+        return { distance: data.routes[0].distance / 1000, duration: data.routes[0].duration }
+      }
+    } catch (error) {
+      console.error('Error drawing route:', error)
+    }
+  }
+  
+  /**
+   * Clear approach route only
+   */
+  const clearApproachRoute = () => {
+    if (!map.value) return
+    if (map.value.getLayer('route-approach')) {
+      map.value.removeLayer('route-approach')
+    }
+    if (map.value.getSource('route-approach')) {
+      map.value.removeSource('route-approach')
+    }
+  }
+  
+  /**
+   * Clear trip route only
+   */
+  const clearTripRoute = () => {
+    if (!map.value) return
+    if (map.value.getLayer('route-trip')) {
+      map.value.removeLayer('route-trip')
+    }
+    if (map.value.getSource('route-trip')) {
+      map.value.removeSource('route-trip')
+    }
+  }
 
   /**
-   * Clear route from map
+   * Clear all routes from map
    */
   const clearRoute = () => {
     if (!map.value) return
 
+    // Clear old single route layer (backward compatibility)
     if (map.value.getLayer('route')) {
       map.value.removeLayer('route')
     }
     if (map.value.getSource('route')) {
       map.value.removeSource('route')
     }
+    
+    // Clear approach and trip routes
+    clearApproachRoute()
+    clearTripRoute()
   }
 
   /**
@@ -373,6 +613,8 @@ export function useMap() {
     map,
     userMarker,
     destinationMarker,
+    pickupMarker,
+    driverMarker,
     userLocation,
     
     // Methods
@@ -381,8 +623,19 @@ export function useMap() {
     centerOnUserLocation,
     setDestinationMarker,
     removeDestinationMarker,
+    addPickupMarker,
+    removePickupMarker,
+    addDestinationMarkerFlag,
+    addDriverMarker,
+    updateDriverMarker,
+    removeDriverMarker,
+    fitMapToMarkers,
     drawRoute,
+    drawBothRoutes,
+    drawRouteFromTo,
     clearRoute,
+    clearApproachRoute,
+    clearTripRoute,
     reverseGeocode
   }
 }

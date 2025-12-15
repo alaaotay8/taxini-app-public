@@ -34,6 +34,10 @@ export function useTripManagement(userLocation = null, destination = null) {
   const nearbyDrivers = ref([])
   const loadingDrivers = ref(false)
   const driversError = ref(null)
+  
+  // Driver fetch caching to prevent redundant API calls
+  let lastDriverFetch = 0
+  const DRIVER_FETCH_COOLDOWN = 3000 // 3 seconds minimum between fetches
 
   /**
    * Calculate distance between two coordinates using Haversine formula
@@ -102,6 +106,17 @@ export function useTripManagement(userLocation = null, destination = null) {
       console.warn('Cannot fetch drivers without user location')
       return { drivers: [], updated: false }
     }
+    
+    // Check cooldown to prevent rapid successive calls (unless forced)
+    const now = Date.now()
+    if (!options.force && (now - lastDriverFetch) < DRIVER_FETCH_COOLDOWN) {
+      if (!options.silent) {
+        console.log('⏳ Driver fetch on cooldown, skipping...')
+      }
+      return { drivers: nearbyDrivers.value, updated: false }
+    }
+    
+    lastDriverFetch = now
 
     // Only show loading spinner if NOT background polling (silent mode)
     if (!options.silent) {
@@ -600,10 +615,18 @@ export function useTripManagement(userLocation = null, destination = null) {
             tripState.value = 'select-driver' // Go back to driver selection
             selectedDriver.value = null
             
-            // Trigger driver list refresh if callback exists
-            if (typeof window !== 'undefined' && window.refreshDriverList) {
-              console.log('🔄 Triggering driver list refresh after cancellation')
-              window.refreshDriverList()
+            // Clear all routes and markers from map
+            if (typeof window !== 'undefined') {
+              if (window.clearAllRoutesAndMarkers) {
+                console.log('🗺️ Clearing all routes and markers from map')
+                window.clearAllRoutesAndMarkers()
+              }
+              
+              // Trigger driver list refresh if callback exists
+              if (window.refreshDriverList) {
+                console.log('🔄 Triggering driver list refresh after cancellation')
+                window.refreshDriverList()
+              }
             }
             return
           }
@@ -677,13 +700,15 @@ export function useTripManagement(userLocation = null, destination = null) {
         selectedDriver.value = null
       }
     } catch (error) {
-      // Only log as error if there's an active trip and it's not a typical "no connection" during state transition
-      if (activeTrip.value && activeTrip.value.status !== 'cancelled') {
+      // Silently handle network errors during trip transitions
+      // Only log as error if there's an active trip in a stable state
+      if (activeTrip.value && 
+          activeTrip.value.status !== 'cancelled' && 
+          activeTrip.value.status !== 'completed' &&
+          !error.message.includes('Network error')) {
         console.error('❌ Error refreshing trip status:', error)
-      } else {
-        // Trip might have just been cancelled or completed, network error is expected
-        console.log('ℹ️ Could not refresh trip status (trip may have ended):', error.message)
       }
+      // Suppress network errors - they're expected during transitions
     }
   }
 
@@ -733,11 +758,13 @@ export function useTripManagement(userLocation = null, destination = null) {
       const response = await riderAPI.confirmPickup(activeTrip.value.id)
       
       if (response.success) {
-        console.log('✅ Pickup confirmed successfully')
-        // Update local trip data
-        if (activeTrip.value) {
+        console.log('✅ Pickup confirmed successfully - Waiting for driver to start trip')
+        // Update local trip data - status stays "accepted" until driver starts
+        if (activeTrip.value && response.trip) {
           activeTrip.value.rider_confirmed_pickup = true
-          activeTrip.value.rider_confirmed_at = new Date().toISOString()
+          activeTrip.value.rider_confirmed_at = response.trip.rider_confirmed_at
+          // Status remains "accepted" - driver must manually start trip
+          console.log('⏳ Trip status: accepted (waiting for driver to start)')
         }
         return response
       } else {

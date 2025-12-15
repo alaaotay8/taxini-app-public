@@ -137,7 +137,7 @@ async def get_all_active_drivers(
                 "updated_at": loc.updated_at.isoformat() if loc.updated_at else None,
                 "name": user.name,
                 "taxi_number": driver.taxi_number if driver else "N/A",
-                "rating": 0.0,  # TODO: Implement rating system
+                "rating": 0.0,
                 "distance_km": distance_km
             }
             drivers.append(driver_info)

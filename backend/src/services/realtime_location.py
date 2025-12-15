@@ -295,3 +295,57 @@ class RealtimeLocationService:
             # Remove from tracking dictionaries
             cls._active_streams.pop(driver_id, None)
             cls._streaming_tasks.pop(driver_id, None)
+    
+    @classmethod
+    async def send_message_to_driver_channel(cls, driver_id: str, message: Dict) -> bool:
+        """
+        Send a message to driver's GPS streaming channel (for trip notifications).
+        
+        Args:
+            driver_id: Driver ID
+            message: Message to broadcast
+            
+        Returns:
+            bool: True if message sent successfully
+        """
+        try:
+            # Check if driver is streaming
+            if driver_id not in cls._active_streams:
+                logger.warning(f"Driver {driver_id} not streaming - cannot send message")
+                return False
+            
+            # Create async Realtime client
+            realtime_url = settings.supabase_url.replace("https://", "wss://").replace("http://", "ws://") + "/realtime/v1/websocket"
+            client = AsyncRealtimeClient(realtime_url, settings.supabase_api_key)
+            
+            try:
+                # Connect to WebSocket
+                await client.connect()
+                
+                # Create channel
+                channel_name = f"driver_{driver_id}"
+                channel = client.channel(channel_name, {"config": {"broadcast": {"ack": False, "self": False}}})
+                
+                # Subscribe to channel
+                def on_subscribe(status, err):
+                    if err:
+                        logger.error(f"Channel subscription error: {err}")
+                
+                await channel.subscribe(on_subscribe)
+                
+                # Send message
+                await channel.send_broadcast("notification", message)
+                logger.info(f"📨 Message sent to driver {driver_id} channel: {message.get('type', 'unknown')}")
+                
+                # Disconnect
+                await client.disconnect()
+                return True
+                
+            except Exception as e:
+                logger.error(f"Failed to send message to driver channel: {e}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending message to driver {driver_id}: {e}")
+            return False
+

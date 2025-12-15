@@ -245,8 +245,7 @@ class NotificationService:
                 logger.error(f"No active GPS streaming for driver {driver_id}")
                 return False
             
-            # Get the GPS streaming channel and send trip notification
-            # Note: We'll need to modify RealtimeLocationService to expose channel access
+            # Send message to driver's GPS channel
             success = await RealtimeLocationService.send_message_to_driver_channel(driver_id, message)
             
             if success:
@@ -258,6 +257,94 @@ class NotificationService:
             
         except Exception as e:
             logger.error(f"Error sending message to GPS channel for driver {driver_id}: {e}")
+            return False
+    
+    @classmethod
+    async def send_trip_notification(
+        cls,
+        session: Session,
+        user_id: str,
+        trip_id: str,
+        notification_type: str,
+        title: str,
+        message: str,
+        data: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """
+        Send and save a trip notification to a user.
+        
+        Args:
+            session: Database session
+            user_id: User ID to notify
+            trip_id: Related trip ID
+            notification_type: Type of notification (trip_request, trip_cancelled, etc.)
+            title: Notification title
+            message: Notification message
+            data: Additional notification data
+            
+        Returns:
+            True if notification saved successfully
+        """
+        try:
+            from src.models.notification import Notification
+            from datetime import timedelta
+            
+            # Create notification data
+            notification_data = data or {}
+            notification_data["trip_id"] = trip_id
+            
+            # Deduplication: Check if same notification type was sent in last 5 minutes for this user
+            five_mins_ago = datetime.utcnow() - timedelta(minutes=5)
+            existing_notifications = session.exec(
+                select(Notification).where(
+                    Notification.user_id == user_id,
+                    Notification.notification_type == notification_type,
+                    Notification.created_at >= five_mins_ago
+                )
+            ).all()
+            
+            # Check if any existing notification has the same trip_id in data
+            for existing in existing_notifications:
+                if existing.data and existing.data.get("trip_id") == trip_id:
+                    logger.info(f"⏭️ Skipping duplicate notification for user {user_id}: {notification_type} (trip {trip_id})")
+                    return True  # Return success but don't create duplicate
+            
+            # Save notification to database
+            notification = Notification(
+                user_id=user_id,
+                notification_type=notification_type,
+                title=title,
+                message=message,
+                data=notification_data,
+                is_read=False
+            )
+            
+            session.add(notification)
+            session.commit()
+            session.refresh(notification)
+            
+            logger.info(f"💾 Saved notification for user {user_id}: {title}")
+            
+            # Also send via realtime channel if it's a driver
+            from src.models.user import Driver
+            driver = session.exec(select(Driver).where(Driver.user_id == user_id)).first()
+            
+            if driver:
+                # Send via GPS streaming channel
+                realtime_message = {
+                    "type": notification_type,
+                    "trip_id": trip_id,
+                    "title": title,
+                    "message": message,
+                    "data": notification_data,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                await cls._send_to_gps_channel(driver.id, realtime_message)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to save notification for user {user_id}: {e}")
             return False
     
     @classmethod

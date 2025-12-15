@@ -548,6 +548,22 @@ class TripService:
                     driver_info=driver_info
                 )
                 
+                # Save notification to database for rider
+                await NotificationService.send_trip_notification(
+                    session=session,
+                    user_id=trip.rider_id,
+                    trip_id=trip_id,
+                    notification_type="trip_accepted",
+                    title="Driver Accepted!",
+                    message=f"{driver_user.name if driver_user else 'Your driver'} is on the way to pick you up.",
+                    data={
+                        "driver_name": driver_user.name if driver_user else "Unknown",
+                        "taxi_number": driver.taxi_number,
+                        "pickup_address": trip.pickup_address,
+                        "destination_address": trip.destination_address
+                    }
+                )
+                
                 logger.info(f"🔔 Supabase notifications handled for trip acceptance {trip_id}")
                 
             except Exception as e:

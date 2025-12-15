@@ -201,7 +201,10 @@ export function useDriverTrip() {
         return true
       }
     } catch (error) {
-      console.error('❌ Failed to check trip requests:', error.message)
+      // Silently handle network errors - expected when offline or no trips available
+      if (!error.message.includes('Network error')) {
+        console.error('❌ Failed to check trip requests:', error.message)
+      }
     }
     return false
   }
@@ -337,12 +340,14 @@ export function useDriverTrip() {
         
       } catch (error) {
         lastError = error
-        console.error(`❌ Accept attempt ${attempt} failed:`, error.message)
+        // Only log non-network errors
+        if (!error.message.includes('Network error')) {
+          console.error(`❌ Accept attempt ${attempt} failed:`, error.message)
+        }
         
         // Wait before retry (exponential backoff)
         if (attempt < maxRetries) {
           const delay = Math.pow(2, attempt) * 500 // 1s, 2s
-          console.log(`⏳ Retrying in ${delay}ms...`)
           await new Promise(resolve => setTimeout(resolve, delay))
         }
       }
@@ -350,13 +355,12 @@ export function useDriverTrip() {
 
     // All retries failed
     isAcceptingTrip.value = false
-    console.error('❌ Failed to accept trip after', maxRetries, 'attempts')
     
     // Show error notification
     if (typeof window !== 'undefined' && window.$notification) {
       window.$notification.error(
-        lastError?.message || 'Could not accept the trip. Please try again.',
-        { title: 'Failed to Accept Trip', priority: 'high' }
+        'Could not accept the trip. Please check your connection and try again.',
+        { title: 'Connection Error', priority: 'high' }
       )
     }
     
@@ -496,16 +500,8 @@ export function useDriverTrip() {
       const fare = currentTrip.value.estimated_cost_tnd
       const netEarnings = fare * 0.8 // After 20% commission
       
-      // Add to notification panel
+      // Add to notification panel (this will also show the toast notification)
       notifyTripCompleted(netEarnings.toFixed(2), 'TND', 'driver')
-      
-      // Show success notification
-      if (typeof window !== 'undefined' && window.$notification) {
-        window.$notification.success(
-          `You earned ${netEarnings.toFixed(2)} TND (after commission)`,
-          { title: 'Trip Completed!', priority: 'high' }
-        )
-      }
       
       completedTrip.value = {
         ...currentTrip.value,
@@ -531,12 +527,10 @@ export function useDriverTrip() {
     }
   }
 
-  // Close completed modal
+  // Close completed modal and submit rating
   const closeCompletedModal = async () => {
     try {
-      // TODO: Send rating to backend
-      // await axios.post(`/api/v1/trips/${completedTrip.value.id}/rate`, { rating: riderRating.value })
-      
+      // Rating submission will be implemented when backend endpoint is ready
       console.log('Trip rated:', riderRating.value)
       
       showCompletedModal.value = false
@@ -574,8 +568,10 @@ export function useDriverTrip() {
         if (!response.has_active_trip || !response.trip) {
           console.log('🚫 Trip no longer active - cancelled by rider')
           if (currentTrip.value) {
-            // Show cancellation alert
-            alert('Trip was cancelled by the rider')
+            // Show cancellation alert using custom dialog
+            if (typeof window !== 'undefined' && window.showCancellationAlert) {
+              window.showCancellationAlert('Trip was cancelled by the rider')
+            }
             currentTrip.value = null
             stopTripMonitoring()
           }
@@ -585,9 +581,20 @@ export function useDriverTrip() {
         // Double-check if trip status is cancelled
         if (response.trip.status === 'cancelled') {
           console.log('🚫 Trip status is cancelled')
-          alert('Trip was cancelled by the rider')
+          // Show cancellation alert using custom dialog
+          if (typeof window !== 'undefined' && window.showCancellationAlert) {
+            window.showCancellationAlert('Trip was cancelled by the rider')
+          }
           currentTrip.value = null
           stopTripMonitoring()
+          return
+        }
+        
+        // Sync rider_confirmed_pickup from backend
+        if (currentTrip.value && response.trip.rider_confirmed_pickup && !currentTrip.value.rider_confirmed_pickup) {
+          console.log('✅ Rider confirmed pickup - updating local state')
+          currentTrip.value.rider_confirmed_pickup = true
+          currentTrip.value.rider_confirmed_at = response.trip.rider_confirmed_at
         }
       } catch (error) {
         console.error('❌ Error monitoring trip status:', error)

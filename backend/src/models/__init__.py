@@ -103,6 +103,7 @@ from .ticket import Ticket, TicketBase, TicketUpdate, TicketStatus, TicketPriori
 from .settings import Settings, SettingsBase, SettingsUpdate, SettingKeys, DEFAULT_SETTINGS
 from .trip import Trip, TripBase
 from .user import User, Driver, Rider, Admin
+from .notification import Notification, NotificationBase
 
 # Intentionally export nothing at the package root for now.
 __all__: list[str] = []

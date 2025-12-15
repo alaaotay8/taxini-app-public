@@ -20,64 +20,10 @@
     </div>
 
     <!-- Notifications Panel -->
-    <transition name="slide-left">
-      <div v-if="showNotificationsPanel" class="notifications-overlay" @click="toggleNotifications">
-        <div class="notifications-panel" @click.stop>
-          <div class="notifications-header">
-            <h2 class="notifications-title">Notifications</h2>
-            <button @click="toggleNotifications" class="btn-close-notifications">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="notifications-content">
-            <div v-if="notifications.length === 0" class="notifications-empty">
-              <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              <p class="empty-text">No notifications yet</p>
-            </div>
-
-            <div v-else class="notifications-list">
-              <div 
-                v-for="notification in notifications" 
-                :key="notification.id" 
-                class="notification-item"
-                :class="{ 'unread': !notification.read }"
-                @click="markAsRead(notification.id)"
-              >
-                <div class="notification-icon" :class="notification.type">
-                  <svg v-if="notification.type === 'trip'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else-if="notification.type === 'cancelled'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else-if="notification.type === 'earnings'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div class="notification-content">
-                  <h4 class="notification-title">{{ notification.title }}</h4>
-                  <p class="notification-message">{{ notification.message }}</p>
-                  <span class="notification-time">{{ notification.time }}</span>
-                </div>
-                <div v-if="!notification.read" class="unread-dot"></div>
-              </div>
-            </div>
-          </div>
-
-          <button @click="clearAllNotifications_func" class="btn-clear-all" v-if="notifications.length > 0">
-            Clear All
-          </button>
-        </div>
-      </div>
-    </transition>
+    <NotificationPanel 
+      :is-open="showNotificationsPanel" 
+      @close="toggleNotifications"
+    />
 
     <!-- Map Container -->
     <div class="map-wrapper">
@@ -272,7 +218,7 @@
           <button 
             @click="handleFindDriver"
             :disabled="!destination"
-            class="btn-primary w-full max-w-sm mx-auto disabled:opacity-50 font-bold py-3 text-base rounded-xl mb-5"
+            class="w-full py-3 px-4 bg-taxini-yellow text-taxini-dark font-bold rounded-xl hover:bg-yellow-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-base mb-5"
           >
             Find Driver
           </button>
@@ -280,12 +226,22 @@
 
         <!-- Select Driver View -->
         <div v-if="tripState === 'select-driver'" class="px-6 pb-3" @click="handleClickOutsideDriverCard">
-          <h2 class="text-2xl font-bold text-white mb-4">Available Drivers</h2>
-          <p class="text-taxini-text-gray mb-6">Select a driver to request a ride</p>
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-taxini-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Available Drivers
+            </h2>
+            <p class="text-taxini-text-gray text-sm">Select a driver to request a ride</p>
+          </div>
           
           <!-- Driver Count Indicator -->
-          <div v-if="nearbyDrivers.length > 0" class="mb-4 flex items-center justify-between px-4 py-2 bg-taxini-green/10 rounded-lg border border-taxini-green/30">
-            <span class="text-taxini-text-gray text-sm">{{ nearbyDrivers.length }} driver{{ nearbyDrivers.length !== 1 ? 's' : '' }} available</span>
+          <div v-if="nearbyDrivers.length > 0" class="mb-5 flex items-center justify-between px-4 py-3 bg-gradient-to-r from-taxini-green/15 to-taxini-green/5 rounded-xl border border-taxini-green/40 shadow-sm">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-taxini-yellow rounded-full animate-pulse"></div>
+              <span class="text-white font-semibold text-sm">{{ nearbyDrivers.length }} driver{{ nearbyDrivers.length !== 1 ? 's' : '' }} available</span>
+            </div>
             <svg v-if="nearbyDrivers.length > 3" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-taxini-yellow animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
@@ -318,34 +274,56 @@
               :key="driver.id"
               @click.stop="selectDriverForBooking(driver)"
               @dblclick="handleSelectAndConfirmDriver(driver)"
-              class="driver-card bg-[#0d2621] rounded-xl p-4 border border-taxini-green/20 hover:border-taxini-yellow/60 hover:shadow-lg hover:shadow-taxini-yellow/20 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
+              class="driver-card bg-gradient-to-br from-[#0d2621] to-[#0a1f1a] rounded-2xl p-5 border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] relative overflow-hidden"
               :class="{ 
-                'border-taxini-yellow shadow-lg shadow-taxini-yellow/20': selectedDriver?.id === driver.id,
+                'border-taxini-yellow/80 shadow-xl shadow-taxini-yellow/30 bg-gradient-to-br from-[#0d2621] to-[#0f2d25]': selectedDriver?.id === driver.id,
+                'border-taxini-green/30 hover:border-taxini-yellow/50 hover:shadow-lg hover:shadow-taxini-yellow/20': selectedDriver?.id !== driver.id,
                 'animate-slide-in': true
               }"
               :style="{ animationDelay: `${index * 100}ms` }"
             >
-              <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 border border-taxini-green/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-taxini-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="flex items-start gap-4">
+                <!-- Driver Avatar -->
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-taxini-yellow/20 to-taxini-green/20 flex items-center justify-center flex-shrink-0 border-2 border-taxini-yellow/40 shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9 text-taxini-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <div class="flex-1">
-                  <h3 class="text-lg font-bold text-white">{{ driver.name }}</h3>
-                  <p class="text-taxini-text-gray text-sm">{{ driver.taxiNumber }}</p>
-                  <div class="flex items-center gap-2 mt-1">
+                
+                <!-- Driver Info -->
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-bold text-white mb-1 truncate">{{ driver.name }}</h3>
+                  <div class="flex items-center gap-2 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-taxini-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-taxini-text-gray text-sm font-medium">{{ driver.taxiNumber }}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
                     <div class="flex items-center">
-                      <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" :class="i <= driver.rating ? 'text-taxini-yellow' : 'text-gray-600'" fill="currentColor" viewBox="0 0 20 20">
+                      <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" :class="i <= driver.rating ? 'text-taxini-yellow' : 'text-gray-600'" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     </div>
-                    <span class="text-taxini-text-gray text-xs">({{ driver.rating }})</span>
+                    <span class="text-taxini-text-gray text-xs font-semibold">({{ driver.rating }})</span>
                   </div>
                 </div>
-                <div class="text-right">
-                  <div class="text-taxini-yellow font-bold text-lg">{{ driver.approachFee.toFixed(2) }} DT</div>
-                  <div class="text-taxini-text-gray text-sm">~{{ driver.eta }} min</div>
+                
+                <!-- ETA & Distance -->
+                <div class="text-right flex-shrink-0">
+                  <div class="flex items-center justify-end gap-1 text-taxini-yellow text-sm font-semibold mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>~{{ driver.eta }} min</span>
+                  </div>
+                  <div class="flex items-center justify-end gap-1 text-taxini-text-gray text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="font-medium">{{ driver.distance?.toFixed(1) || '0' }} km</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -503,64 +481,67 @@
 
         <!-- Trip Requested View -->
         <!-- Waiting for Driver Acceptance View -->
-        <div v-if="tripState === 'requested'" class="flex flex-col h-full">
+        <div v-if="tripState === 'requested'" class="flex flex-col" style="max-height: calc(100vh - 220px);">
             <!-- Header -->
-            <div class="text-center px-6 pt-6 pb-6 flex-shrink-0">
-              <div class="w-20 h-20 mx-auto bg-taxini-yellow/20 rounded-full flex items-center justify-center mb-4">
-                <svg class="animate-spin h-10 w-10 text-taxini-yellow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div class="text-center px-6 pt-4 pb-3 flex-shrink-0">
+              <div class="w-16 h-16 mx-auto bg-taxini-yellow/20 rounded-full flex items-center justify-center mb-3">
+                <svg class="animate-spin h-8 w-8 text-taxini-yellow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               </div>
-              <h2 class="text-xl font-bold text-white mb-2">Searching for Driver...</h2>
-              <p class="text-taxini-text-gray text-sm">Your trip request is being sent to nearby drivers</p>
+              <h2 class="text-lg font-bold text-white mb-1">Searching for Driver...</h2>
+              <p class="text-taxini-text-gray text-xs">Your trip request is being sent to nearby drivers</p>
             </div>
 
-            <!-- Waiting Message Card -->
-            <div class="bg-[#0d2621] rounded-2xl mx-6 mb-4 p-6 border border-taxini-green/20">
-              <!-- Animated dots -->
-              <div class="flex justify-center items-center gap-2 mb-4">
-                <div class="w-3 h-3 bg-taxini-yellow rounded-full animate-bounce" style="animation-delay: 0s"></div>
-                <div class="w-3 h-3 bg-taxini-yellow rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                <div class="w-3 h-3 bg-taxini-yellow rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-              </div>
-              
-              <!-- Trip Info -->
-              <div class="space-y-3 text-center">
-                <div class="text-white">
-                  <div class="text-sm text-taxini-text-gray mb-1">From</div>
-                  <div class="font-semibold text-base">{{ formattedPickupAddress || 'Loading...' }}</div>
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-y-auto min-h-0 px-6">
+              <!-- Waiting Message Card -->
+              <div class="bg-[#0d2621] rounded-2xl mb-3 p-4 border border-taxini-green/20">
+                <!-- Animated dots -->
+                <div class="flex justify-center items-center gap-2 mb-3">
+                  <div class="w-2.5 h-2.5 bg-taxini-yellow rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                  <div class="w-2.5 h-2.5 bg-taxini-yellow rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                  <div class="w-2.5 h-2.5 bg-taxini-yellow rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
                 </div>
                 
-                <div class="flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-taxini-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
-                
-                <div class="text-white">
-                  <div class="text-sm text-taxini-text-gray mb-1">To</div>
-                  <div class="font-semibold text-base">{{ formattedDestinationAddress || 'Loading...' }}</div>
-                </div>
-                
-                <div class="border-t border-taxini-green/20 pt-3 mt-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-taxini-text-gray text-sm">Estimated Cost</span>
-                    <span class="text-taxini-yellow font-bold text-lg">{{ activeTrip?.estimated_cost_tnd || '0.00' }} TND</span>
+                <!-- Trip Info -->
+                <div class="space-y-2 text-center">
+                  <div class="text-white">
+                    <div class="text-xs text-taxini-text-gray mb-0.5">From</div>
+                    <div class="font-semibold text-sm leading-tight">{{ formattedPickupAddress || 'Loading...' }}</div>
+                  </div>
+                  
+                  <div class="flex items-center justify-center py-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-taxini-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
+                  
+                  <div class="text-white">
+                    <div class="text-xs text-taxini-text-gray mb-0.5">To</div>
+                    <div class="font-semibold text-sm leading-tight">{{ formattedDestinationAddress || 'Loading...' }}</div>
+                  </div>
+                  
+                  <div class="border-t border-taxini-green/20 pt-2 mt-2">
+                    <div class="flex items-center justify-between">
+                      <span class="text-taxini-text-gray text-xs">Estimated Cost</span>
+                      <span class="text-taxini-yellow font-bold text-base">{{ activeTrip?.estimated_cost_tnd || '0.00' }} TND</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <!-- Status Message -->
-              <div class="mt-4 px-4 py-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
-                <p class="text-sm text-blue-400 text-center">
-                  Notifying nearby drivers of your request...
-                </p>
+                
+                <!-- Status Message -->
+                <div class="mt-3 px-3 py-2 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                  <p class="text-xs text-blue-400 text-center">
+                    Notifying nearby drivers of your request...
+                  </p>
+                </div>
               </div>
             </div>
 
           <!-- Cancel Button - Always visible at bottom -->
-          <div class="px-6 pb-4 pt-2 flex-shrink-0">
+          <div class="px-6 pb-4 pt-3 flex-shrink-0">
             <button @click="handleCancelTrip" class="w-full bg-red-500/20 text-red-500 border-2 border-red-500 font-semibold py-3 rounded-xl hover:bg-red-500/30 transition-all text-sm">
               Cancel Trip Request
             </button>
@@ -657,9 +638,9 @@
         </div>
 
         <!-- Active Trip View -->
-        <div v-if="tripState === 'active'" class="px-6 pb-6 overflow-y-auto" style="max-height: 85vh;">
+        <div v-if="tripState === 'active'" class="px-6 pb-8 overflow-y-auto" style="max-height: 90vh;">
           <!-- Backend Status Indicator -->
-          <div v-if="activeTrip && showTripDetails" class="mb-4 px-4 py-2 bg-taxini-dark-light/50 rounded-lg border border-taxini-green/20">
+          <div v-if="activeTrip" class="mb-4 px-4 py-2 bg-taxini-dark-light/50 rounded-lg border border-taxini-green/20">
             <p class="text-xs text-taxini-text-gray text-center">
               Backend: <span class="text-taxini-yellow font-mono">{{ activeTrip.status }}</span>
               <span v-if="activeTrip.started_at" class="ml-2">
@@ -668,8 +649,7 @@
             </p>
           </div>
 
-          <!-- Trip Details Section (can be toggled) -->
-          <div v-if="showTripDetails">
+          <!-- Trip Details Section (always shown for active trips) -->
             <!-- Driver Card -->
             <div class="bg-[#0d2621] rounded-2xl p-4 mb-4 border border-taxini-green/20">
             <div class="flex items-center gap-4">
@@ -764,37 +744,37 @@
               <span class="text-taxini-yellow font-bold text-2xl">{{ activeTrip?.estimated_cost_tnd?.toFixed(2) || estimatedCost?.totalEstimate?.toFixed(2) || '0.00' }} TND</span>
             </div>
           </div>
-          </div>
 
           <!-- Cancel Button (only if not started) -->
-          <button v-if="tripStatus !== 'Started'" @click="handleCancelTrip" class="w-full bg-red-500/20 text-red-500 border-2 border-red-500 font-bold py-4 rounded-2xl hover:bg-red-500/30 transition-all">
+          <button v-if="tripStatus !== 'Started'" @click="handleCancelTrip" class="w-full bg-red-500/20 text-red-500 border-2 border-red-500 font-bold py-4 rounded-2xl hover:bg-red-500/30 transition-all mb-4">
             Cancel Trip
           </button>
         </div>
 
         <!-- Trip Completed View -->
-        <div v-if="tripState === 'completed'" class="px-6 pb-6 overflow-y-auto" style="max-height: 580px;">
-          <div class="text-center mb-6">
-            <div class="w-24 h-24 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div v-if="tripState === 'completed'" class="px-5 pb-4">
+          <!-- Compact Header -->
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 class="text-2xl font-bold text-white mb-2">Trip Completed!</h2>
-            <p class="text-taxini-text-gray">Thank you for riding with Taxini</p>
+            <h2 class="text-xl font-bold text-white mb-1">Trip Completed!</h2>
+            <p class="text-taxini-text-gray text-sm">Thank you for riding with Taxini</p>
           </div>
 
-          <!-- Trip Summary -->
-          <div class="bg-[#0d2621] rounded-2xl p-6 mb-6 border border-taxini-green/20">
-            <h3 class="text-lg font-bold text-white mb-4">Trip Summary</h3>
-            <div class="space-y-3">
+          <!-- Compact Trip Summary -->
+          <div class="bg-[#0d2621] rounded-xl p-4 mb-4 border border-taxini-green/20">
+            <h3 class="text-sm font-bold text-white mb-2">Trip Summary</h3>
+            <div class="space-y-1.5 text-sm">
               <div class="flex items-center justify-between">
                 <span class="text-taxini-text-gray">Distance</span>
-                <span class="text-white font-bold">{{ tripSummary.distance }} km</span>
+                <span class="text-white font-semibold">{{ tripSummary.distance }} km</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-taxini-text-gray">Duration</span>
-                <span class="text-white font-bold">{{ tripSummary.duration }} min</span>
+                <span class="text-white font-semibold">{{ tripSummary.duration }} min</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-taxini-text-gray">Base Fare</span>
@@ -804,24 +784,24 @@
                 <span class="text-taxini-text-gray">Distance Fee</span>
                 <span class="text-white">{{ tripSummary.distanceFee }} TND</span>
               </div>
-              <div class="flex items-center justify-between border-t border-taxini-green/20 pt-3">
-                <span class="text-white font-bold text-lg">Total Cost</span>
-                <span class="text-taxini-yellow font-bold text-2xl">{{ tripSummary.totalCost }} TND</span>
+              <div class="flex items-center justify-between border-t border-taxini-green/20 pt-2 mt-2">
+                <span class="text-white font-bold">Total Cost</span>
+                <span class="text-taxini-yellow font-bold text-xl">{{ tripSummary.totalCost }} TND</span>
               </div>
             </div>
           </div>
 
-          <!-- Rating -->
-          <div class="bg-[#0d2621] rounded-2xl p-6 mb-6 border border-taxini-green/20">
-            <h3 class="text-lg font-bold text-white mb-4 text-center">Rate Your Driver</h3>
-            <div class="flex justify-center gap-2 mb-4">
+          <!-- Compact Rating -->
+          <div class="bg-[#0d2621] rounded-xl p-4 mb-4 border border-taxini-green/20">
+            <h3 class="text-sm font-bold text-white mb-3 text-center">Rate Your Driver</h3>
+            <div class="flex justify-center gap-1.5 mb-3">
               <button
                 v-for="star in 5"
                 :key="star"
                 @click="rating = star"
                 class="transition-all"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" :class="star <= rating ? 'text-taxini-yellow' : 'text-gray-600'" fill="currentColor" viewBox="0 0 20 20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" :class="star <= rating ? 'text-taxini-yellow' : 'text-gray-600'" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </button>
@@ -829,14 +809,14 @@
             <textarea
               v-model="review"
               placeholder="Share your experience (optional)"
-              class="input-field-dark resize-none h-24"
+              class="input-field-dark resize-none h-16 text-sm"
             ></textarea>
           </div>
 
           <button 
             @click="handleCompleteTripRating" 
             :disabled="isSubmittingRating"
-            class="btn-primary w-full font-bold py-5 text-xl rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            class="btn-primary w-full font-bold py-3 text-base rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <span v-if="!isSubmittingRating">Done</span>
             <span v-else class="flex items-center justify-center">
@@ -910,64 +890,58 @@
 
     <!-- Side Menu -->
     <transition name="slide-fade">
-      <div v-if="showSideMenu" class="fixed inset-0 z-50">
-        <div @click="showSideMenu = false" class="absolute inset-0 bg-black/70"></div>
-        <div class="absolute left-0 top-0 bottom-0 w-80 bg-taxini-dark-light shadow-2xl">
-          <!-- Profile Header -->
-          <div class="p-6 border-b border-taxini-green/20">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-20 h-20 bg-taxini-green/20 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-taxini-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold text-white">{{ user?.name }}</h3>
-                <p class="text-taxini-text-gray text-sm">{{ user?.phone }}</p>
-              </div>
+      <div v-if="showSideMenu" class="menu-overlay" @click="showSideMenu = false">
+        <div class="side-menu" @click.stop>
+          <div class="menu-header">
+            <div class="user-avatar">
+              <span class="avatar-text">{{ userInitials }}</span>
             </div>
-            <button @click="navigateTo('/rider/profile')" class="w-full bg-taxini-yellow text-taxini-dark font-bold py-3 rounded-xl hover:bg-taxini-yellow-dark transition-all">
-              Edit Profile
+            <div class="user-info">
+              <h3 class="user-name">{{ user?.name }}</h3>
+              <p class="user-phone">{{ user?.phone }}</p>
+            </div>
+          </div>
+
+          <button @click="navigateTo('/rider/profile')" class="btn-edit-profile">
+            Edit Profile
+          </button>
+
+          <div class="menu-items">
+            <button @click="navigateTo('/rider/profile')" class="menu-item">
+              <svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span class="menu-item-text">My Profile</span>
+            </button>
+
+            <button @click="navigateTo('/rider/history')" class="menu-item">
+              <svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="menu-item-text">Trip History</span>
+            </button>
+
+            <button @click="navigateTo('/rider/support')" class="menu-item">
+              <svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span class="menu-item-text">Support</span>
+            </button>
+
+            <button v-if="user?.hasDriverProfile" @click="switchToDriver" class="menu-item">
+              <svg class="menu-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <span class="menu-item-text">Switch to Driver</span>
             </button>
           </div>
 
-          <!-- Menu Items -->
-          <div class="p-6 space-y-2">
-            <button @click="navigateTo('/rider/profile')" class="w-full flex items-center gap-4 px-4 py-3 text-white hover:bg-taxini-green/20 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span class="font-medium">My Profile</span>
-            </button>
-            <button @click="navigateTo('/rider/history')" class="w-full flex items-center gap-4 px-4 py-3 text-white hover:bg-taxini-green/20 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="font-medium">Trip History</span>
-            </button>
-            <button @click="navigateTo('/rider/support')" class="w-full flex items-center gap-4 px-4 py-3 text-white hover:bg-taxini-green/20 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span class="font-medium">Support</span>
-            </button>
-            <button v-if="user?.hasDriverProfile" @click="switchToDriver" class="w-full flex items-center gap-4 px-4 py-3 text-taxini-yellow hover:bg-taxini-green/20 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-              <span class="font-medium">Switch to Driver</span>
-            </button>
-          </div>
-
-          <!-- Logout -->
-          <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-taxini-green/20">
-            <button @click="logout" class="w-full flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span class="font-medium">Logout</span>
-            </button>
-          </div>
+          <button @click="logout" class="btn-logout">
+            <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span class="logout-text">Logout</span>
+          </button>
         </div>
       </div>
     </transition>
@@ -1055,7 +1029,9 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import riderNotificationService from '@/services/riderNotificationService'
-import { useNotificationStore } from '@/services/notificationStore'
+import { useNotificationStore as useOldNotificationStore } from '@/services/notificationStore'
+import { useNotificationStore } from '@/stores/notificationStore'
+import NotificationPanel from '@/components/NotificationPanel.vue'
 
 // Composables
 import { useMap } from '@/composables/rider/useMap'
@@ -1077,7 +1053,18 @@ const {
   setDestinationMarker,
   removeDestinationMarker,
   drawRoute,
+  drawBothRoutes,
+  drawRouteFromTo,
   clearRoute,
+  clearApproachRoute,
+  clearTripRoute,
+  addPickupMarker,
+  removePickupMarker,
+  addDestinationMarkerFlag,
+  addDriverMarker,
+  updateDriverMarker,
+  removeDriverMarker,
+  fitMapToMarkers,
   reverseGeocode
 } = useMap()
 
@@ -1196,23 +1183,39 @@ const updateFormattedAddresses = async () => {
   
   try {
     if (activeTrip.value) {
-      // PICKUP: Format using service
-      isGeocodingPickup.value = true
-      formattedPickupAddress.value = 'Getting location...'
+      // PICKUP: Use backend address if available, otherwise geocode
+      if (activeTrip.value.pickup_address && 
+          activeTrip.value.pickup_address !== 'Pickup location' &&
+          activeTrip.value.pickup_address !== 'Getting location...') {
+        formattedPickupAddress.value = activeTrip.value.pickup_address
+        console.log('✅ Using backend pickup address:', activeTrip.value.pickup_address)
+      } else {
+        // Fallback to geocoding
+        isGeocodingPickup.value = true
+        formattedPickupAddress.value = 'Getting location...'
+        
+        const pickupAddress = await formatTripLocation(activeTrip.value, 'pickup')
+        formattedPickupAddress.value = pickupAddress
+        isGeocodingPickup.value = false
+        console.log('✅ Pickup formatted via geocoding:', pickupAddress)
+      }
       
-      const pickupAddress = await formatTripLocation(activeTrip.value, 'pickup')
-      formattedPickupAddress.value = pickupAddress
-      isGeocodingPickup.value = false
-      console.log('✅ Pickup formatted:', pickupAddress)
-      
-      // DESTINATION: Format using service
-      isGeocodingDestination.value = true
-      formattedDestinationAddress.value = 'Getting location...'
-      
-      const destinationAddress = await formatTripLocation(activeTrip.value, 'destination')
-      formattedDestinationAddress.value = destinationAddress
-      isGeocodingDestination.value = false
-      console.log('✅ Destination formatted:', destinationAddress)
+      // DESTINATION: Use backend address if available, otherwise geocode
+      if (activeTrip.value.destination_address && 
+          activeTrip.value.destination_address !== 'Destination' &&
+          activeTrip.value.destination_address !== 'Getting location...') {
+        formattedDestinationAddress.value = activeTrip.value.destination_address
+        console.log('✅ Using backend destination address:', activeTrip.value.destination_address)
+      } else {
+        // Fallback to geocoding
+        isGeocodingDestination.value = true
+        formattedDestinationAddress.value = 'Getting location...'
+        
+        const destinationAddress = await formatTripLocation(activeTrip.value, 'destination')
+        formattedDestinationAddress.value = destinationAddress
+        isGeocodingDestination.value = false
+        console.log('✅ Destination formatted via geocoding:', destinationAddress)
+      }
     } else {
       // No active trip yet - use current location and temp destination
       if (userLocation.value?.lat && userLocation.value?.lng) {
@@ -1303,6 +1306,22 @@ if (typeof window !== 'undefined') {
       // Update hash to ensure UI reflects the refresh
       lastDriverListHash = createDriverListHash(nearbyDrivers.value)
     }
+  }
+  
+  // Add map cleanup callback for when trip is cancelled
+  window.clearAllRoutesAndMarkers = () => {
+    console.log('🗺️ Clearing all routes and markers from map')
+    // Clear all routes
+    clearRoute()
+    clearApproachRoute()
+    clearTripRoute()
+    
+    // Remove all markers except current location
+    removePickupMarker()
+    removeDestinationMarker()
+    removeDriverMarker()
+    
+    console.log('✅ Map cleaned - only current location marker remains')
   }
 }
 
@@ -1628,13 +1647,13 @@ const bottomSheetHeight = computed(() => {
     case 'driver-found':
       return 'h-[650px]'
     case 'requested':
-      return 'h-[650px]'
+      return 'h-[550px]'
     case 'driver-approaching':
       return 'h-[650px]' // Optimized for driver info + route + actions
     case 'active':
-      return 'h-[700px]'
+      return 'h-[780px]'
     case 'completed':
-      return 'h-[600px]'
+      return 'h-[680px]'
     default:
       return 'h-[420px]'
   }
@@ -1645,6 +1664,15 @@ const user = computed(() => authStore.user || {
   phone: '+216 12 345 678',
   email: 'ahmed@example.com',
   hasDriverProfile: false
+})
+
+const userInitials = computed(() => {
+  const name = user.value?.name || 'R'
+  const parts = String(name).trim().split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+  }
+  return String(name).trim().charAt(0).toUpperCase() || 'R'
 })
 
 // Methods - Wrappers to connect composables
@@ -1659,11 +1687,26 @@ const handleEnableDestinationPicker = () => {
   }
 }
 
-const handleMapClickForDestination = (e) => {
+const handleMapClickForDestination = async (e) => {
+  // Handle the destination marker placement
   onMapClickForDestination(e, map.value, setDestinationMarker)
+  
+  // Pre-fetch nearby drivers in background while user is reviewing destination
+  // This makes the driver list appear instantly when they confirm
+  if (userLocation.value && userLocation.value.lat && userLocation.value.lng) {
+    console.log('🔍 Pre-fetching nearby drivers in background...')
+    
+    // Fetch silently without changing UI state yet
+    try {
+      await fetchNearbyDrivers(userLocation.value.lat, userLocation.value.lng, { silent: true })
+      console.log('✅ Drivers pre-loaded:', nearbyDrivers.value?.length || 0, 'drivers ready')
+    } catch (error) {
+      console.warn('⚠️ Pre-fetch drivers failed (will retry on confirm):', error.message)
+    }
+  }
 }
 
-const handleConfirmDestination = () => {
+const handleConfirmDestination = async () => {
   // Draw route before confirming
   if (tempDestinationCoords.value) {
     drawRoute(tempDestinationCoords.value.lng, tempDestinationCoords.value.lat)
@@ -1676,6 +1719,28 @@ const handleConfirmDestination = () => {
   confirmDestination(map.value, () => {
     showBottomSheet.value = true
   })
+  
+  // Change to select-driver state
+  tripState.value = 'select-driver'
+  
+  // Check if drivers are already loaded (from pre-fetch)
+  if (nearbyDrivers.value && nearbyDrivers.value.length > 0) {
+    console.log('✨ Drivers already pre-loaded:', nearbyDrivers.value.length, 'drivers available instantly!')
+  } else {
+    // Drivers not pre-loaded, fetch them now
+    if (userLocation.value && userLocation.value.lat && userLocation.value.lng) {
+      console.log('🔍 Fetching nearby drivers (pre-fetch missed)...')
+      
+      try {
+        await fetchNearbyDrivers(userLocation.value.lat, userLocation.value.lng)
+        console.log('✅ Nearby drivers fetched:', nearbyDrivers.value?.length || 0)
+      } catch (error) {
+        console.error('❌ Failed to fetch nearby drivers:', error)
+      }
+    } else {
+      console.warn('⚠️ Cannot fetch drivers: User location not available')
+    }
+  }
 }
 
 const handleCancelDestination = () => {
@@ -1710,6 +1775,23 @@ const handleSelectDestination = (suggestion) => {
 }
 
 const confirmDriverSelection = async () => {
+  // Check authentication first
+  if (!authStore.isAuthenticated || !authStore.user) {
+    console.error('🔒 User not authenticated!')
+    displayToast('Please log in to request a ride', 'error')
+    // Refresh session
+    try {
+      await authStore.getCurrentUser()
+      if (!authStore.isAuthenticated) {
+        router.push('/login')
+        return
+      }
+    } catch (err) {
+      router.push('/login')
+      return
+    }
+  }
+  
   // Prevent double submission
   if (isCreatingTrip.value) {
     console.log('⚠️ Trip creation already in progress')
@@ -1834,19 +1916,40 @@ const logout = () => {
 
 // Notifications
 const showNotificationsPanel = ref(false)
-const {
-  notifications,
-  unreadCount: unreadNotifications,
-  markAsRead,
-  clearAll: clearAllNotifications,
-  notifyTripCompleted,
-  notifyTripCancelled,
-  notifyTripAccepted,
-  notifyDriverArrived,
-  notifyTripStarted,
-  notifyNoDriversAvailable,
-  notifyDriverDeclined
-} = useNotificationStore()
+const oldNotificationStore = useOldNotificationStore()
+const notificationStore = useNotificationStore()
+const notifications = computed(() => notificationStore.notifications)
+const unreadNotifications = computed(() => notificationStore.unreadCount)
+
+// Fetch notifications on mount and periodically
+const fetchNotifications = async () => {
+  try {
+    await notificationStore.fetchNotifications()
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error)
+  }
+}
+
+// Watch for panel open to fetch and mark today's notifications as read
+watch(showNotificationsPanel, async (isOpen) => {
+  if (isOpen) {
+    await fetchNotifications()
+    // Mark today's notifications as read when panel opens
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    for (const notif of notifications.value) {
+      if (!notif.is_read) {
+        const notifDate = new Date(notif.created_at)
+        notifDate.setHours(0, 0, 0, 0)
+        
+        if (notifDate.getTime() === today.getTime()) {
+          await notificationStore.markAsRead(notif.id)
+        }
+      }
+    }
+  }
+})
 
 // Map Methods
 const recenterToMyLocation = () => {
@@ -1885,7 +1988,7 @@ const startTripStatusPolling = () => {
   if (statusPollingInterval) clearInterval(statusPollingInterval)
   
   statusPollingInterval = setInterval(async () => {
-    if (tripState.value !== 'search' && tripState.value !== 'select-driver' && tripState.value !== 'completed') {
+    if (tripState.value !== 'search' && tripState.value !== 'select-driver' && tripState.value !== 'completed' && activeTrip.value) {
       console.log('🔄 Polling trip status...')
       await refreshTripStatus()
     }
@@ -1981,7 +2084,7 @@ const startTripTracking = () => {
   if (distanceTracker) clearInterval(distanceTracker)
   
   let lastLocation = null
-  distanceTracker = setInterval(() => {
+  distanceTracker = setInterval(async () => {
     if (userLocation.value && userLocation.value.lat && userLocation.value.lng) {
       if (lastLocation) {
         // Calculate distance using Haversine formula
@@ -1996,6 +2099,11 @@ const startTripTracking = () => {
         
         // Add to total distance
         tripDistance.value += distance
+        
+        // Update route in real-time during active trip
+        if (tripState.value === 'active' && activeTrip.value?.destination_longitude && activeTrip.value?.destination_latitude) {
+          await drawRoute(activeTrip.value.destination_longitude, activeTrip.value.destination_latitude, 'trip')
+        }
       }
       lastLocation = { lat: userLocation.value.lat, lng: userLocation.value.lng }
     }
@@ -2060,14 +2168,53 @@ watch(tripState, async (newState, oldState) => {
     stopDriverPolling()
   }
   
+  // When driver is approaching, add markers and draw both routes
+  if (newState === 'driver-approaching' && activeTrip.value) {
+    console.log('🚗 Driver approaching - adding markers and drawing both routes')
+    const driverLoc = activeTrip.value.driver_location || { lat: activeTrip.value.driver_latitude, lng: activeTrip.value.driver_longitude }
+    const pickup = { lat: activeTrip.value.pickup_latitude, lng: activeTrip.value.pickup_longitude }
+    const dest = { lat: activeTrip.value.destination_latitude, lng: activeTrip.value.destination_longitude }
+    
+    // Add markers: driver (taxi), pickup (pin), destination (flag)
+    if (driverLoc?.lat) {
+      addDriverMarker(driverLoc.lat, driverLoc.lng)
+    }
+    if (pickup?.lat) {
+      addPickupMarker(pickup.lat, pickup.lng)
+    }
+    if (dest?.lat) {
+      addDestinationMarkerFlag(dest.lat, dest.lng)
+    }
+    
+    // Draw both routes: blue (driver->pickup) + yellow (pickup->destination)
+    if (driverLoc?.lat && pickup?.lat && dest?.lat) {
+      await drawBothRoutes(driverLoc, pickup, dest)
+    }
+    
+    // Fit map to show all markers
+    fitMapToMarkers()
+  }
+  
   // Start tracking when trip becomes active (driver started the trip)
   if (newState === 'active' && oldState !== 'active') {
-    console.log('🚗 Trip started - beginning tracking and drawing route')
+    console.log('🚗 Trip started - beginning tracking and drawing trip route only')
     startTripTracking()
     
-    // Draw route from current location to destination
-    if (activeTrip.value && activeTrip.value.destination_longitude && activeTrip.value.destination_latitude) {
-      await drawRoute(activeTrip.value.destination_longitude, activeTrip.value.destination_latitude)
+    // Clear approach route, keep only trip route (yellow)
+    clearApproachRoute()
+    removePickupMarker() // Remove pickup marker since we're past pickup
+    
+    // Keep destination marker and draw trip route
+    if (activeTrip.value) {
+      const dest = { lat: activeTrip.value.destination_latitude, lng: activeTrip.value.destination_longitude }
+      if (dest?.lat) {
+        addDestinationMarkerFlag(dest.lat, dest.lng)
+      }
+      
+      // Draw trip route from current location to destination
+      if (activeTrip.value.destination_longitude && activeTrip.value.destination_latitude) {
+        await drawRoute(activeTrip.value.destination_longitude, activeTrip.value.destination_latitude, 'trip')
+      }
     }
   }
   
@@ -2088,10 +2235,10 @@ watch(tripState, async (newState, oldState) => {
     startDriverPolling()
   }
   
-  // Show completion confirmation modal when driver marks trip as completed
+  // Skip to completed view directly when driver marks trip as completed (no intermediate modal)
   if (newState === 'completed' && oldState === 'active') {
-    console.log('✅ Trip completed by driver - showing confirmation modal')
-    showCompletionModal.value = true
+    console.log('✅ Trip completed by driver - showing rating view directly')
+    // Don't show modal, go directly to completed state with rating
     stopTripStatusPolling()
     stopDriverPolling()
     stopTripTracking()
@@ -2163,38 +2310,35 @@ watch(activeTrip, async (newTrip) => {
 onMounted(async () => {
   console.log('🚀 Rider Dashboard mounted')
   
-  // Initialize map immediately (non-blocking)
+  // Priority 1: Verify authentication first
+  if (!authStore.isAuthenticated || !authStore.user) {
+    console.log('⚠️ User not authenticated, attempting to fetch user...')
+    try {
+      await authStore.getCurrentUser()
+      if (!authStore.isAuthenticated) {
+        console.error('🔒 Not authenticated, redirecting to login')
+        router.push('/login')
+        return
+      }
+      console.log('✅ User authenticated:', authStore.user)
+    } catch (err) {
+      console.error('❌ Failed to authenticate:', err)
+      router.push('/login')
+      return
+    }
+  }
+  
+  // Priority 2: Initialize map and location immediately (critical for UX)
   initMap()
   getCurrentLocation()
   
-  // Parallelize independent operations for faster loading
-  const user = authStore.user
-  const operations = []
+  // Priority 3: Check for active trip (blocks driver polling)
+  const hasActiveTrip = await checkActiveTrip()
   
-  // 1. Subscribe to notifications (non-blocking)
-  if (user && user.id) {
-    operations.push(
-      riderNotificationService.subscribe(user.id, (notification) => {
-        console.log('📬 Received real-time notification:', notification)
-        if (['trip_accepted', 'trip_cancelled', 'trip_started', 'driver_arrived'].includes(notification.type)) {
-          setTimeout(() => refreshTripStatus(), 500)
-        }
-      }).catch(err => console.warn('⚠️ Notification subscription failed:', err))
-    )
-  }
-  
-  // 2. Check for active trip (parallel with other operations)
-  operations.push(checkActiveTrip())
-  
-  // Wait for all operations to complete
-  const [, hasActiveTrip] = await Promise.allSettled(operations)
-  const isActiveTripPresent = hasActiveTrip.status === 'fulfilled' && hasActiveTrip.value
-  
-  // Update pickup address in background (delayed, non-blocking)
-  setTimeout(() => updatePickupLocationAddress(), 800)
-  
-  if (isActiveTripPresent) {
+  // Priority 4: Start appropriate polling based on trip status
+  if (hasActiveTrip) {
     console.log('✅ Resuming active trip')
+    startTripStatusPolling()
     
     // Restore trip state to UI
     if (window.restoreTripState) {
@@ -2229,21 +2373,59 @@ onMounted(async () => {
         }
       }, 500)
     }
-    
-    startTripStatusPolling()
   } else {
-    // No active trip, start driver polling
-    console.log('▶️ Starting driver status polling')
+    console.log('▶️ No active trip, starting driver polling')
     startDriverPolling()
-    
-    // Do initial fetch if location is already available
-    if (userLocation.value && userLocation.value.lat && userLocation.value.lng) {
-      console.log('📍 User location available, fetching initial driver list...')
-      fetchNearbyDrivers(userLocation.value.lat, userLocation.value.lng)
-      // Also fetch nearest places for destination suggestions
-      fetchNearestPlaces()
-    }
   }
+  
+  // Priority 5: Background tasks (non-blocking, can fail silently)
+  const user = authStore.user
+  
+  // Fetch notifications (non-blocking)
+  if (user && user.id) {
+    // Initial fetch of notifications and unread count
+    Promise.all([
+      fetchNotifications(),
+      notificationStore.fetchUnreadCount()
+    ]).catch(err => {
+      console.warn('⚠️ Could not fetch notifications on mount:', err.message)
+    })
+    
+    // Subscribe to real-time notifications (non-blocking)
+    riderNotificationService.subscribe(user.id, (notification) => {
+      console.log('📬 Received real-time notification:', notification)
+      if (['trip_accepted', 'trip_cancelled', 'trip_started', 'driver_arrived'].includes(notification.type)) {
+        setTimeout(() => refreshTripStatus(), 500)
+      }
+      // Refresh unread count when new notification arrives
+      notificationStore.fetchUnreadCount().catch(() => {})
+    }).catch(err => console.warn('⚠️ Notification subscription failed:', err))
+  }
+  
+  // Poll notifications every 30 seconds
+  const notificationPollInterval = setInterval(async () => {
+    try {
+      await notificationStore.fetchUnreadCount()
+    } catch (err) {
+      // Silently fail
+    }
+  }, 30000)
+  
+  // Update pickup address in background (delayed, non-blocking)
+  setTimeout(() => updatePickupLocationAddress(), 800)
+  
+  // Fetch initial driver list if location available
+  if (userLocation.value && userLocation.value.lat && userLocation.value.lng && !hasActiveTrip) {
+    console.log('📍 User location available, fetching initial driver list...')
+    fetchNearbyDrivers(userLocation.value.lat, userLocation.value.lng)
+    // Also fetch nearest places for destination suggestions
+    fetchNearestPlaces()
+  }
+  
+  // Clean up notification polling on unmount
+  onUnmounted(() => {
+    clearInterval(notificationPollInterval)
+  })
 })
 
 // Cleanup on unmount

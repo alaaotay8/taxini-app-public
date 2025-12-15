@@ -247,7 +247,7 @@ const selectedDateRange = ref('month')
 const selectedStatus = ref('all')
 const selectedTrip = ref(null)
 const currentPage = ref(1)
-const tripsPerPage = 10
+const tripsPerPage = 50  // Increased from 10 to 50 to load more history
 
 // Backend data
 const allTrips = ref([])
@@ -264,35 +264,51 @@ const fetchTripHistory = async () => {
     // Calculate offset based on current page
     const offset = (currentPage.value - 1) * tripsPerPage
     
-    // Fetch from backend
+    // Fetch from backend - Note: axios interceptor already extracts response.data
     const response = await riderAPI.getTripHistory(tripsPerPage, offset)
     
-    console.log('✅ Trip history response:', response.data)
+    console.log('✅ Trip history response:', response)
+    console.log('✅ Response.trips:', response?.trips)
+    console.log('✅ Response.success:', response?.success)
     
-    if (response.data && response.data.trips) {
-      // Map backend response to frontend format
-      allTrips.value = response.data.trips.map(trip => ({
-        id: trip.id,
-        date: new Date(trip.created_at || trip.updated_at),
-        pickup: trip.pickup_address || 'Pickup location',
-        destination: trip.destination_address || 'Destination',
-        driver_name: trip.driver?.name || trip.driver?.full_name || 'Driver',
-        taxi_number: trip.driver?.taxi_number || 'N/A',
-        cost: trip.estimated_cost || trip.final_cost || 0,
-        base_fare: 5.00, // Default base fare (could come from settings)
-        distance_fee: (trip.estimated_cost || trip.final_cost || 0) - 5.00,
-        status: trip.status,
-        distance: trip.distance || 0,
-        duration: trip.duration || 'N/A'
-      }))
+    // Check if response has trips (axios interceptor already extracted .data)
+    if (response && response.trips) {
+      console.log(`📊 Mapping ${response.trips.length} trips from backend`)
       
-      totalTrips.value = response.data.total || allTrips.value.length
+      // Map backend response to frontend format
+      allTrips.value = response.trips.map(trip => {
+        const mappedTrip = {
+          id: trip.id,
+          date: new Date(trip.completed_at || trip.cancelled_at || trip.requested_at || trip.created_at),
+          pickup: trip.pickup_address || 'Pickup location',
+          destination: trip.destination_address || 'Destination',
+          driver_name: trip.driver?.name || trip.driver?.full_name || 'Driver',
+          taxi_number: trip.driver?.taxi_number || 'N/A',
+          cost: trip.estimated_cost_tnd || trip.final_cost || 0,
+          base_fare: 5.00,
+          distance_fee: (trip.estimated_cost_tnd || trip.final_cost || 0) - 5.00,
+          status: trip.status,
+          distance: trip.estimated_distance_km || 0,
+          duration: trip.duration || 'N/A',
+          requested_at: trip.requested_at,
+          completed_at: trip.completed_at,
+          cancelled_at: trip.cancelled_at,
+          rider_rating: trip.rider_rating,
+          driver_rating: trip.driver_rating
+        }
+        console.log(`  ✓ Mapped trip ${trip.id}: status=${trip.status}, date=${mappedTrip.date}`)
+        return mappedTrip
+      })
+      
+      totalTrips.value = response.total_returned || allTrips.value.length
+      console.log(`✅ Successfully loaded ${allTrips.value.length} trips (total: ${totalTrips.value})`)
     } else {
+      console.warn('⚠️ No trips in response or invalid response format')
       allTrips.value = []
       totalTrips.value = 0
     }
     
-    console.log(`✅ Loaded ${allTrips.value.length} trips`)
+    console.log(`✅ Final allTrips.value length: ${allTrips.value.length}`)
   } catch (err) {
     console.error('❌ Error fetching trip history:', err)
     error.value = err.message || 'Failed to load trip history'
@@ -316,14 +332,26 @@ watch([selectedStatus, selectedDateRange], () => {
 // Computed
 const filteredTrips = computed(() => {
   let trips = allTrips.value
+  
+  console.log(`🔍 Filtering ${trips.length} trips:`)
+  console.log(`   selectedStatus: "${selectedStatus.value}"`)
+  console.log(`   selectedDateRange: "${selectedDateRange.value}"`)
 
   // Filter by status
   if (selectedStatus.value !== 'all') {
-    trips = trips.filter(t => t.status === selectedStatus.value)
+    const beforeFilter = trips.length
+    trips = trips.filter(t => {
+      const matches = t.status === selectedStatus.value
+      console.log(`   Trip ${t.id.substring(0,8)}: status="${t.status}" ${matches ? '✓' : '✗'}`)
+      return matches
+    })
+    console.log(`   Status filter: ${beforeFilter} → ${trips.length} trips`)
   }
 
   // Filter by date range
   const now = new Date()
+  const beforeDateFilter = trips.length
+  
   if (selectedDateRange.value === 'today') {
     trips = trips.filter(t => {
       const tripDate = new Date(t.date)
@@ -331,11 +359,19 @@ const filteredTrips = computed(() => {
     })
   } else if (selectedDateRange.value === 'week') {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    trips = trips.filter(t => new Date(t.date) >= weekAgo)
+    trips = trips.filter(t => {
+      const tripDate = new Date(t.date)
+      return tripDate >= weekAgo
+    })
   } else if (selectedDateRange.value === 'month') {
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    trips = trips.filter(t => new Date(t.date) >= monthAgo)
+    trips = trips.filter(t => {
+      const tripDate = new Date(t.date)
+      return tripDate >= monthAgo
+    })
   }
+  
+  console.log(`🎯 Final filtered trips: ${trips.length}`)
 
   return trips.sort((a, b) => new Date(b.date) - new Date(a.date))
 })

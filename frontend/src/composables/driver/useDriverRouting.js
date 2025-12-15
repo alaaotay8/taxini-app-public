@@ -180,7 +180,7 @@ export function useDriverRouting(map, driverLocation) {
    * Called when driver accepts the trip
    */
   const showDriverToPickupRoute = async (pickupLocation) => {
-    console.log('🗺️ Showing driver-to-pickup route (BLUE)')
+    console.log('🗺️ Showing driver-to-pickup route')
     
     if (!map.value || !driverLocation.value) {
       console.error('Map or driver location not available')
@@ -189,12 +189,7 @@ export function useDriverRouting(map, driverLocation) {
 
     // Initialize layers if needed
     if (!map.value.getLayer(driverRouteLayerId)) {
-      addRouteLayer(driverRouteSourceId, driverRouteLayerId, '#2196F3', 7) // Blue, thicker line
-    } else {
-      // Make sure layer is visible and blue
-      map.value.setLayoutProperty(driverRouteLayerId, 'visibility', 'visible')
-      map.value.setPaintProperty(driverRouteLayerId, 'line-color', '#2196F3')
-      map.value.setPaintProperty(driverRouteLayerId, 'line-width', 7)
+      addRouteLayer(driverRouteSourceId, driverRouteLayerId, '#2196F3', 6) // Blue
     }
 
     // Fetch and display driver-to-pickup route
@@ -207,8 +202,6 @@ export function useDriverRouting(map, driverLocation) {
       driverToPickupRoute.value = route
       updateRoute(driverRouteSourceId, route)
       routeMode.value = 'to-pickup'
-      
-      console.log('✅ Driver-to-pickup route displayed in BLUE')
       
       // Keep both routes visible - trip route (yellow) + driver route (blue)
       // Fit map to show both routes

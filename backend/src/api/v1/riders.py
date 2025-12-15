@@ -489,7 +489,7 @@ async def confirm_pickup(
                 detail=f"Cannot confirm pickup for trip with status '{trip.status}'. Trip must be in 'accepted' status."
             )
         
-        # Update trip with rider confirmation
+        # Update trip with rider confirmation - driver must manually start trip
         from datetime import datetime
         trip.rider_confirmed_pickup = True
         trip.rider_confirmed_at = datetime.utcnow()
@@ -497,11 +497,27 @@ async def confirm_pickup(
         session.commit()
         session.refresh(trip)
         
-        logger.info(f"✅ Rider {user.id} confirmed pickup for trip {trip_id}")
+        logger.info(f"✅ Rider {user.id} confirmed pickup for trip {trip_id} - Waiting for driver to start trip")
         
-        # Notify driver that rider confirmed (notification system can be implemented later)
+        # Notify driver that rider confirmed and they can now start the trip
         if trip.driver_id:
-            logger.info(f"📱 Driver {trip.driver_id} can now start the trip (rider confirmed)")
+            try:
+                from src.services.notification import NotificationService
+                await NotificationService.send_trip_notification(
+                    session=session,
+                    user_id=trip.driver_id,
+                    trip_id=trip.id,
+                    notification_type="rider_confirmed",
+                    title="Rider Confirmed Pickup",
+                    message=f"Rider has confirmed pickup. You can now start the trip to {trip.destination_address or 'destination'}.",
+                    data={
+                        "pickup_address": trip.pickup_address,
+                        "destination_address": trip.destination_address
+                    }
+                )
+                logger.info(f"📱 Sent rider confirmation notification to driver {trip.driver_id}")
+            except Exception as e:
+                logger.error(f"Failed to send confirmation notification to driver: {e}")
         
         return {
             "success": True,
@@ -596,23 +612,41 @@ async def cancel_trip(
         if assigned_driver_id:
             try:
                 from src.services.realtime_location import RealtimeLocationService
+                from src.services.notification import NotificationService
                 
                 # Get driver info using the stored driver_id
                 driver = session.exec(select(Driver).where(Driver.user_id == assigned_driver_id)).first()
-                if driver and RealtimeLocationService.is_driver_streaming(driver.id):
-                    notification = {
-                        "type": "trip_cancelled",
-                        "trip_id": trip.id,
-                        "cancelled_by": "rider",
-                        "rider_name": user.name,
-                        "reason": reason or "No reason provided",
-                        "timestamp": datetime.utcnow().isoformat(),
-                        "message": f"Trip cancelled by rider: {reason or 'No reason provided'}"
-                    }
+                if driver:
+                    # Save notification to database for driver
+                    await NotificationService.send_trip_notification(
+                        session=session,
+                        user_id=assigned_driver_id,
+                        trip_id=trip.id,
+                        notification_type="trip_cancelled",
+                        title="Trip Cancelled",
+                        message=f"Trip cancelled by rider. Reason: {reason or 'No reason provided'}",
+                        data={
+                            "trip_id": str(trip.id),
+                            "cancellation_reason": reason or "No reason provided",
+                            "cancelled_by": "rider"
+                        }
+                    )
+                    logger.info(f"💾 Saved cancellation notification for driver {driver.id}")
                     
-                    from src.services.notification import NotificationService
-                    await NotificationService._send_to_gps_channel(driver.id, notification)
-                    logger.info(f"📱 Sent cancellation notification to driver {driver.id}")
+                    # Also send via GPS streaming channel if driver is streaming
+                    if RealtimeLocationService.is_driver_streaming(driver.id):
+                        notification = {
+                            "type": "trip_cancelled",
+                            "trip_id": trip.id,
+                            "cancelled_by": "rider",
+                            "rider_name": user.name,
+                            "reason": reason or "No reason provided",
+                            "timestamp": datetime.utcnow().isoformat(),
+                            "message": f"Trip cancelled by rider: {reason or 'No reason provided'}"
+                        }
+                        
+                        await NotificationService._send_to_gps_channel(driver.id, notification)
+                        logger.info(f"📱 Sent cancellation notification to driver {driver.id} via GPS channel")
             except Exception as e:
                 logger.error(f"Failed to send cancellation notification to driver: {e}")
         
@@ -818,6 +852,8 @@ async def get_rider_trip_history(
         # Find the user
         user = get_user_from_current_user(session, current_user)
         
+        logger.info(f"📜 Fetching trip history for rider: {user.name} (ID: {user.id}, Role: {user.role})")
+        
         if user.role != "rider":
             raise HTTPException(status_code=403, detail="Only riders can access this endpoint")
         
@@ -829,6 +865,13 @@ async def get_rider_trip_history(
             .offset(offset)
             .limit(limit)
         ).all()
+        
+        logger.info(f"📊 Found {len(trips)} trips for rider {user.name}")
+        if trips:
+            status_summary = {}
+            for trip in trips:
+                status_summary[trip.status] = status_summary.get(trip.status, 0) + 1
+            logger.info(f"📊 Status breakdown: {status_summary}")
         
         trip_list = []
         for trip in trips:
@@ -865,6 +908,8 @@ async def get_rider_trip_history(
                 "driver_rating": trip.driver_rating
             })
         
+        logger.info(f"✅ Returning {len(trip_list)} trips to frontend")
+        
         return {
             "success": True,
             "trips": trip_list,
@@ -877,4 +922,105 @@ async def get_rider_trip_history(
         raise
     except Exception as e:
         logger.error(f"Error getting trip history: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+class TripTimeoutCheckRequest(BaseModel):
+    trip_id: str
+    still_on_trip: bool
+
+
+@router.post("/trip-timeout-check")
+async def rider_trip_timeout_check(
+    request: TripTimeoutCheckRequest,
+    session: Session = Depends(get_session),
+    current_user: CurrentUser = Depends(AuthService.get_current_user_dependency)
+) -> dict:
+    """
+    Handle rider's response to 30-minute trip timeout check.
+    
+    Args:
+        request: Request body with trip_id and still_on_trip
+        session: Database session
+        current_user: Authenticated rider user
+    
+    Returns:
+        Success status and trip status
+    """
+    try:
+        # Find the user
+        user = get_user_from_current_user(session, current_user)
+        
+        if user.role != "rider":
+            raise HTTPException(status_code=403, detail="Only riders can respond to timeout checks")
+        
+        # Get the trip
+        trip = session.exec(
+            select(Trip).where(Trip.id == request.trip_id)
+        ).first()
+        
+        if not trip:
+            raise HTTPException(status_code=404, detail="Trip not found")
+        
+        # Verify trip belongs to this rider
+        if trip.rider_id != user.id:
+            raise HTTPException(status_code=403, detail="You can only respond to checks for your own trips")
+        
+        # Check if trip is in progress
+        if trip.status != "started":
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Trip is not in progress (current status: {trip.status})"
+            )
+        
+        if not request.still_on_trip:
+            # Rider responded NO or timeout occurred - cancel the trip
+            trip.status = "cancelled"
+            trip.cancelled_at = datetime.now(timezone.utc)
+            trip.cancellation_reason = "Trip timeout - Rider indicated not on trip or no response"
+            
+            # Set driver back to online
+            if trip.driver:
+                trip.driver.driver_status = "online"
+            
+            session.add(trip)
+            session.commit()
+            session.refresh(trip)
+            
+            # Notify both parties
+            await NotificationService.send_trip_notification(
+                session=session,
+                user_id=trip.driver_id,
+                trip_id=trip.id,
+                notification_type="trip_cancelled",
+                title="Trip Cancelled - Timeout",
+                message=f"Trip cancelled after 30-minute status check (Rider response: No)",
+                data={
+                    "trip_id": str(trip.id),
+                    "cancellation_reason": trip.cancellation_reason,
+                    "cancelled_by": "system_timeout"
+                }
+            )
+            
+            logger.info(f"Trip {request.trip_id} cancelled due to timeout check from rider")
+            
+            return {
+                "success": True,
+                "message": "Trip cancelled due to timeout",
+                "trip_status": "cancelled"
+            }
+        else:
+            # Rider responded YES - continue the trip
+            logger.info(f"Trip {request.trip_id} status confirmed by rider, continuing")
+            
+            return {
+                "success": True,
+                "message": "Trip status confirmed, continuing",
+                "trip_status": "started"
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error handling rider timeout check: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")

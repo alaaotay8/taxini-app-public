@@ -185,33 +185,56 @@ const router = createRouter({
   routes
 })
 
-// Navigation Guards
+/**
+ * Navigation Guard
+ * 
+ * Protects routes based on authentication and role requirements.
+ * Runs before every route navigation to enforce access control.
+ * 
+ * Flow:
+ * 1. Check if authenticated users are trying to access public auth pages → redirect to dashboard
+ * 2. Allow access to public routes (no auth required)
+ * 3. Check if user is authenticated for protected routes → redirect to login if not
+ * 4. Check if user has correct role for route → redirect to correct dashboard if wrong role
+ * 5. Allow access if all checks pass
+ */
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  const requiresAuth = to.meta.requiresAuth
-  const requiredRole = to.meta.role
+  const requiresAuth = to.meta.requiresAuth  // Does route require authentication?
+  const requiredRole = to.meta.role          // Does route require specific role?
 
-  // If token exists but no user data, try to fetch user
-  if (authStore.token && !authStore.user) {
-    try {
-      await authStore.getCurrentUser()
-    } catch (error) {
-      console.warn('Failed to fetch user on navigation:', error.message)
+  // STEP 1: Prevent authenticated users from accessing login/signup pages
+  // If user is already logged in, redirect them to their dashboard
+  if (!requiresAuth && authStore.isAuthenticated && (to.path === '/' || to.path === '/login' || to.path === '/signup')) {
+    const userRole = authStore.user?.role
+    const targetPath = userRole === 'rider' ? '/rider' : userRole === 'driver' ? '/driver' : userRole === 'admin' ? '/admin' : null
+    
+    // Only redirect if not already going to the correct dashboard
+    if (targetPath && to.path !== targetPath) {
+      next(targetPath)
+      return
     }
   }
 
-  // Check token expiration (client-side check)
-  if (authStore.token && isTokenExpired(authStore.token)) {
-    console.warn('🔒 Token expired - logging out')
-    authStore.logout()
+  // STEP 2: Allow access to public routes (no authentication required)
+  if (!requiresAuth) {
+    next()
+    return
   }
 
-  if (requiresAuth && !authStore.isAuthenticated) {
-    // Redirect to login if not authenticated
+  // STEP 3: Check authentication for protected routes
+  // If route requires auth but user is not authenticated, redirect to login
+  if (!authStore.isAuthenticated) {
     next('/login')
-  } else if (requiredRole && authStore.user?.role !== requiredRole) {
-    // Prevent privilege escalation - redirect to correct dashboard based on role
+    return
+  }
+
+  // STEP 4: Check role-based authorization
+  // If route requires specific role but user has different role, redirect to correct dashboard
+  if (requiredRole && authStore.user?.role !== requiredRole) {
     const userRole = authStore.user?.role
+    
+    // Redirect to correct dashboard based on user's actual role
     if (userRole === 'rider') {
       next('/rider')
     } else if (userRole === 'driver') {
@@ -219,24 +242,15 @@ router.beforeEach(async (to, from, next) => {
     } else if (userRole === 'admin') {
       next('/admin')
     } else {
-      authStore.logout()
+      // Unknown role, logout and redirect to login
+      await authStore.logout()
       next('/login')
     }
-  } else if (!requiresAuth && authStore.isAuthenticated && to.path === '/') {
-    // Redirect authenticated users from onboarding to their dashboard
-    const userRole = authStore.user?.role
-    if (userRole === 'rider') {
-      next('/rider')
-    } else if (userRole === 'driver') {
-      next('/driver')
-    } else if (userRole === 'admin') {
-      next('/admin')
-    } else {
-      next()
-    }
-  } else {
-    next()
+    return
   }
+
+  // STEP 5: All checks passed, allow access to route
+  next()
 })
 
 export default router

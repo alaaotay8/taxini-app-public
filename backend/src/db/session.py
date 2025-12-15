@@ -26,10 +26,9 @@ def get_database_url() -> str:
             hostname = db_url.split("@")[1].split(":")[0]
             # Get IPv4 address only
             ipv4_addr = socket.getaddrinfo(hostname, None, socket.AF_INET)[0][4][0]
-            # Replace hostname with IP in URL
             db_url = db_url.replace(hostname, ipv4_addr)
         except Exception as e:
-            print(f"Warning: Could not resolve IPv4 for {hostname}: {e}")
+            logger.warning(f"Could not resolve IPv4 for {hostname}: {e}")
     
     return db_url
 
@@ -38,10 +37,10 @@ engine = create_engine(
     get_database_url(),
     echo=False,  # Set to True for development debugging
     pool_pre_ping=True,
-    pool_recycle=300,
-    # Optimized PostgreSQL pooling for better performance
-    pool_size=10,  # Increased from 5 for better concurrency
-    max_overflow=20,  # Increased from 10 for peak load handling
+    pool_recycle=300,  # Recycle connections after 5 minutes
+    # Supabase free tier limit: 15 connections max in Session mode
+    pool_size=3,  # Keep pool small for free tier
+    max_overflow=5,  # Allow some overflow (total max: 8 connections)
     pool_timeout=30,  # Timeout for getting connection from pool
     connect_args={
         "connect_timeout": 10,
@@ -55,10 +54,10 @@ async_engine = create_async_engine(
     get_database_url().replace("postgresql://", "postgresql+asyncpg://"),
     echo=False,
     pool_pre_ping=True,
-    pool_recycle=300,
-    # Optimized async PostgreSQL pooling
-    pool_size=30,  # Increased from 20 for better async concurrency
-    max_overflow=10,  # Allow some overflow for burst traffic
+    pool_recycle=300,  # Recycle connections after 5 minutes
+    # Supabase free tier limit: 15 connections max in Session mode
+    pool_size=3,  # Keep pool small for free tier
+    max_overflow=4,  # Allow some overflow (total max: 7 connections)
     pool_timeout=30
 )
 

@@ -234,13 +234,14 @@ export function useDriverMap() {
     })
   }
 
-  // Draw route on map
-  const drawRoute = async (pickup, destination, isNavigation = false) => {
+  // Draw route on map with specific route type
+  // routeType: 'approach' (blue: driver->pickup), 'trip' (yellow: pickup->destination), 'navigation' (blue)
+  const drawRoute = async (origin, destination, routeType = 'trip') => {
     if (!map.value) return
 
     try {
       const query = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${pickup.lng},${pickup.lat};${destination.lng},${destination.lat}?geometries=geojson&steps=true&overview=full&access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?geometries=geojson&steps=true&overview=full&access_token=${mapboxgl.accessToken}`
       )
       const json = await query.json()
       
@@ -257,13 +258,23 @@ export function useDriverMap() {
       currentRouteDistance.value = (distanceInMeters / 1000).toFixed(2)
       remainingDistance.value = currentRouteDistance.value
       
-      console.log(`🗺️ Route drawn: ${currentRouteDistance.value} km, Duration: ${Math.round(data.duration / 60)} min`)
+      // Determine route color based on type
+      const routeColors = {
+        'approach': '#3B82F6',  // Blue: driver to pickup
+        'trip': '#FFD000',      // Yellow: pickup to destination
+        'navigation': '#3B82F6' // Blue: active navigation
+      }
+      const routeColor = routeColors[routeType] || '#FFD000'
+      const layerId = routeType === 'approach' ? 'route-approach' : 'route-trip'
+      
+      console.log(`🗺️ Route drawn (${routeType}): ${currentRouteDistance.value} km, Duration: ${Math.round(data.duration / 60)} min`)
 
       const geojson = {
         type: 'Feature',
         properties: {
           distance: data.distance,
-          duration: data.duration
+          duration: data.duration,
+          routeType: routeType
         },
         geometry: {
           type: 'LineString',
@@ -271,11 +282,11 @@ export function useDriverMap() {
         }
       }
 
-      if (map.value.getSource('route')) {
-        map.value.getSource('route').setData(geojson)
+      if (map.value.getSource(layerId)) {
+        map.value.getSource(layerId).setData(geojson)
       } else {
         map.value.addLayer({
-          id: 'route',
+          id: layerId,
           type: 'line',
           source: {
             type: 'geojson',
@@ -286,17 +297,11 @@ export function useDriverMap() {
             'line-cap': 'round'
           },
           paint: {
-            'line-color': isNavigation ? '#3B82F6' : '#FFD000',
+            'line-color': routeColor,
             'line-width': 6,
             'line-opacity': 0.85
           }
         })
-      }
-      
-      // If this is navigation mode, update route color
-      if (isNavigation && map.value.getLayer('route')) {
-        map.value.setPaintProperty('route', 'line-color', '#3B82F6')
-        map.value.setPaintProperty('route', 'line-width', 6)
       }
       
       return {
@@ -306,6 +311,35 @@ export function useDriverMap() {
     } catch (error) {
       console.error('Error drawing route:', error)
       return null
+    }
+  }
+  
+  // Draw both routes: approach (blue) and trip (yellow)
+  const drawBothRoutes = async (driverLoc, pickup, destination) => {
+    if (!map.value) return
+    
+    // Draw approach route (driver -> pickup) in blue
+    await drawRoute(driverLoc, pickup, 'approach')
+    
+    // Draw trip route (pickup -> destination) in yellow
+    await drawRoute(pickup, destination, 'trip')
+    
+    console.log('🗺️ Both routes drawn: blue (approach) + yellow (trip)')
+  }
+  
+  // Clear approach route only
+  const clearApproachRoute = () => {
+    if (map.value && map.value.getLayer('route-approach')) {
+      map.value.removeLayer('route-approach')
+      map.value.removeSource('route-approach')
+    }
+  }
+  
+  // Clear trip route only
+  const clearTripRoute = () => {
+    if (map.value && map.value.getLayer('route-trip')) {
+      map.value.removeLayer('route-trip')
+      map.value.removeSource('route-trip')
     }
   }
 
@@ -369,12 +403,17 @@ export function useDriverMap() {
     }
   }
   
-  // Clear route from map
+  // Clear all routes from map
   const clearRoute = () => {
+    // Clear old single route layer (backward compatibility)
     if (map.value && map.value.getLayer('route')) {
       map.value.removeLayer('route')
       map.value.removeSource('route')
     }
+    // Clear approach route
+    clearApproachRoute()
+    // Clear trip route
+    clearTripRoute()
     stopNavigation()
   }
 
@@ -425,6 +464,9 @@ export function useDriverMap() {
     removeDestinationMarker,
     fitMapToBounds,
     drawRoute,
+    drawBothRoutes,
+    clearApproachRoute,
+    clearTripRoute,
     startNavigation,
     stopNavigation,
     clearRoute,

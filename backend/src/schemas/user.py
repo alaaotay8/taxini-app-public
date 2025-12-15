@@ -82,6 +82,7 @@ class UpdateProfileRequest(BaseModel):
     """Request schema for updating user profile."""
     name: Optional[str] = Field(None, min_length=2, max_length=100)
     email: Optional[str] = Field(None)
+    residence_place: Optional[str] = Field(None, description="Residence place for rider profile")
     role_specific_data: Optional[Dict[str, Any]] = Field(default=None)
     acting_as: Optional[UserRole] = Field(None, description="Which profile role to update (rider/driver). Required for multi-role users.")
 

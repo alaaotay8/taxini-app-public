@@ -1,19 +1,19 @@
+/**
+ * API Service
+ * 
+ * Centralized API client using Axios for all backend communication.
+ * Handles authentication via HttpOnly cookies and API key validation.
+ * 
+ * Features:
+ * - Automatic cookie handling (HttpOnly JWT tokens)
+ * - API key authentication via X-API-Key header
+ * - Request/response interceptors for error handling
+ * - 15-second timeout for all requests
+ * - Automatic error message extraction
+ */
 import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
-
-// Cache token to avoid repeated localStorage reads
-let cachedToken = localStorage.getItem('taxini_token')
-
-// Update cached token when it changes
-const updateCachedToken = (token) => {
-  cachedToken = token
-  if (token) {
-    localStorage.setItem('taxini_token', token)
-  } else {
-    localStorage.removeItem('taxini_token')
-  }
-}
 
 // Validate API key is configured
 const API_KEY = import.meta.env.VITE_API_KEY
@@ -21,87 +21,99 @@ if (!API_KEY) {
   console.error('⚠️ VITE_API_KEY is not configured! API requests will fail.')
 }
 
-// Create axios instance with performance optimizations
+/**
+ * Axios instance configured for Taxini API
+ * - withCredentials: true enables HttpOnly cookie handling
+ * - X-API-Key header required by backend for all requests
+ * - validateStatus: Accept all responses < 500 (handle 4xx in interceptor)
+ */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // 15 second timeout
+  timeout: 15000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'X-API-Key': API_KEY
-    // Note: Accept-Encoding is automatically handled by the browser
   },
-  // Enable HTTP compression (browser handles this automatically)
   decompress: true,
-  // Validate status to handle all error codes
-  validateStatus: (status) => status < 500 // Reject only if server error
+  validateStatus: (status) => status < 500
 })
 
-// Request interceptor - Add auth token (using cached value)
+// Request interceptor (currently pass-through, can add logging if needed)
 apiClient.interceptors.request.use(
-  (config) => {
-    if (cachedToken) {
-      config.headers.Authorization = `Bearer ${cachedToken}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (config) => config,
+  (error) => Promise.reject(error)
 )
 
-// Response interceptor - Handle errors
+/**
+ * Response interceptor
+ * Extracts data from successful responses and handles errors uniformly.
+ * 
+ * Error handling:
+ * - 401: Authentication required (let app handle redirect)
+ * - 4xx: Extract error message from response
+ * - Network errors: Return generic network error message
+ */
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response) {
-      // Handle 401 Unauthorized (token expired)
       if (error.response.status === 401) {
-        console.error('🔒 Token expired or invalid - logging out')
-        // Clear auth data
-        updateCachedToken(null)
-        localStorage.removeItem('taxini_user')
-        // Redirect to login
-        window.location.href = '/login'
-        return Promise.reject(new Error('Session expired. Please login again.'))
+        return Promise.reject(error)
       }
-      
-      // Server responded with error
       const message = error.response.data?.detail || error.response.data?.message || 'An error occurred'
       return Promise.reject(new Error(message))
     } else if (error.request) {
-      // Request made but no response
       return Promise.reject(new Error('Network error. Please check your connection.'))
     } else {
-      // Something else happened
       return Promise.reject(new Error(error.message || 'An error occurred'))
     }
   }
 )
 
 // =============================================================================
-// LOCATION API
+// LOCATION API - Real-time location tracking and driver discovery
 // =============================================================================
 
 export const locationAPI = {
-  // Get nearby drivers
+  /**
+   * Get nearby online drivers within radius
+   * @param {number} latitude - Rider's current latitude
+   * @param {number} longitude - Rider's current longitude
+   * @returns {Promise} List of nearby drivers with distance
+   */
   getNearbyDrivers: (latitude, longitude) => 
     apiClient.get('/locations/drivers', { params: { latitude, longitude } }),
 
-  // Update user location
+  /**
+   * Update user's current location (for real-time tracking)
+   * @param {string} userId - User ID
+   * @param {number} latitude - Current latitude
+   * @param {number} longitude - Current longitude
+   * @param {string} role - User role (driver/rider)
+   * @returns {Promise} Update confirmation
+   */
   updateLocation: (userId, latitude, longitude, role = 'driver') =>
     apiClient.post(`/locations/update/${userId}`, { latitude, longitude, role }),
 
-  // Get user location
+  /**
+   * Get user's last known location
+   * @param {string} userId - User ID to lookup
+   * @returns {Promise} Location data
+   */
   getUserLocation: (userId) => 
     apiClient.get(`/locations/user/${userId}`)
 }
 
 // =============================================================================
-// RIDER API
+// RIDER API - Trip creation and management for riders
 // =============================================================================
 
 export const riderAPI = {
-  // Command a course - find nearest driver
+  /**
+   * Command a course - Legacy endpoint for finding nearest driver
+   * @deprecated Use createTrip with driverId instead
+   */
   commandCourse: (riderLat, riderLng, destinationLat, destinationLng) =>
     apiClient.post('/riders/command-course', {
       rider_lat: riderLat,
@@ -110,7 +122,18 @@ export const riderAPI = {
       destination_lng: destinationLng
     }),
 
-  // Create a trip
+  /**
+   * Create a new trip request
+   * @param {number} pickupLat - Pickup location latitude
+   * @param {number} pickupLng - Pickup location longitude
+   * @param {number} destLat - Destination latitude
+   * @param {number} destLng - Destination longitude
+   * @param {string} pickupAddress - Human-readable pickup address
+   * @param {string} destAddress - Human-readable destination address
+   * @param {string} notes - Optional rider notes for driver
+   * @param {string} driverId - Selected driver ID (null for auto-assignment)
+   * @returns {Promise} Created trip data
+   */
   createTrip: (pickupLat, pickupLng, destLat, destLng, pickupAddress = null, destAddress = null, notes = null, driverId = null) =>
     apiClient.post('/riders/create-trip', {
       pickup_latitude: pickupLat,
@@ -121,13 +144,21 @@ export const riderAPI = {
       destination_address: destAddress,
       rider_notes: notes,
       trip_type: 'regular',
-      driver_id: driverId  // Selected driver ID from user
+      driver_id: driverId
     }),
 
-  // Get active trip
+  /**
+   * Get rider's current active trip (if any)
+   * @returns {Promise} Active trip data or null
+   */
   getActiveTrip: () => apiClient.get('/riders/active-trip'),
 
-  // Get trip history
+  /**
+   * Get rider's trip history with pagination
+   * @param {number} limit - Number of trips to return
+   * @param {number} offset - Number of trips to skip
+   * @returns {Promise} List of past trips
+   */
   getTripHistory: (limit = 10, offset = 0) =>
     apiClient.get('/riders/trip-history', { params: { limit, offset } }),
 
@@ -144,8 +175,13 @@ export const riderAPI = {
     apiClient.post(`/riders/trips/${tripId}/confirm-completion`),
 
   // Rate trip
-  rateTrip: (tripId, rating, comment = null) =>
-    apiClient.post(`/riders/trips/${tripId}/rate`, null, { params: { rating, comment } })
+  rateTrip: (tripId, rating, comment = null) => {
+    const params = { rating }
+    if (comment) {
+      params.comment = comment
+    }
+    return apiClient.post(`/riders/trips/${tripId}/rate`, null, { params })
+  }
 }
 
 // =============================================================================
@@ -217,7 +253,14 @@ export const ticketAPI = {
     apiClient.patch(`/tickets/${ticketId}`, updateData)
 }
 
-// Export token cache updater for auth store
-export { updateCachedToken }
+// =============================================================================
+// USER API (Profile Management)
+// =============================================================================
+
+export const userAPI = {
+  // Update user profile
+  updateProfile: (profileData) =>
+    apiClient.post('/users/update-profile', profileData)
+}
 
 export default apiClient

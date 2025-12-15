@@ -113,7 +113,7 @@ class TripActionResponse(BaseModel):
 class TripStatusUpdateRequest(BaseModel):
     """Request model for trip status updates."""
     trip_id: str = Field(..., min_length=1, max_length=100, description="Trip ID")
-    status: str = Field(..., pattern="^(started|completed)$", description="New status: started or completed")
+    status: str = Field(..., pattern="^(started|completed|cancelled)$", description="New status: started, completed, or cancelled")
     notes: Optional[str] = Field(None, max_length=1000, description="Optional notes")
 
 
@@ -816,8 +816,8 @@ async def update_trip_status(
         
         # Validate status transitions
         valid_transitions = {
-            "accepted": ["started"],
-            "started": ["completed"]
+            "accepted": ["started", "cancelled"],
+            "started": ["started", "completed", "cancelled"]  # Allow started->started for idempotency
         }
         
         if old_status not in valid_transitions:
@@ -832,18 +832,93 @@ async def update_trip_status(
                 detail=f"Invalid status transition from '{old_status}' to '{status_request.status}'. Valid transitions: {valid_transitions[old_status]}"
             )
         
-        # Additional validation for starting trip - require rider confirmation
-        if status_request.status == "started" and not trip.rider_confirmed_pickup:
-            raise HTTPException(
-                status_code=400,
-                detail="Cannot start trip: Rider has not confirmed pickup yet. Please wait for rider confirmation."
+        # Handle trip cancellation
+        if status_request.status == "cancelled":
+            trip.status = "cancelled"
+            trip.cancelled_at = datetime.utcnow()
+            trip.cancellation_reason = status_request.notes or "Driver cancelled the trip"
+            
+            # Set driver back to online when trip is cancelled
+            driver.driver_status = "online"
+            session.add(driver)
+            
+            # Send notification to rider about cancellation
+            try:
+                await NotificationService.send_trip_notification(
+                    session=session,
+                    user_id=trip.rider_id,
+                    trip_id=trip.id,
+                    notification_type="trip_cancelled",
+                    title="Trip Cancelled",
+                    message=f"Your trip has been cancelled by the driver. Reason: {trip.cancellation_reason}",
+                    data={
+                        "trip_id": str(trip.id),
+                        "cancellation_reason": trip.cancellation_reason,
+                        "cancelled_by": "driver"
+                    }
+                )
+                logger.info(f"🔔 Sent trip cancellation notification to rider {trip.rider_id}")
+            except Exception as e:
+                logger.error(f"Failed to send cancellation notification to rider: {e}")
+            
+            session.add(trip)
+            session.commit()
+            session.refresh(trip)
+            
+            logger.info(f"🚗 Trip {trip.id} cancelled by driver {driver.id}")
+            
+            return TripStatusUpdateResponse(
+                success=True,
+                message="Trip cancelled successfully",
+                trip_id=status_request.trip_id,
+                old_status=old_status,
+                new_status="cancelled",
+                updated_at=datetime.utcnow().isoformat()
             )
+        
+        # Additional validation for starting trip - require rider confirmation
+        # Note: Trip may already be started if rider confirmed pickup (auto-start feature)
+        if status_request.status == "started":
+            if trip.status == "started":
+                # Trip already started by rider confirmation, just return success
+                return TripStatusUpdateResponse(
+                    success=True,
+                    message="Trip is already started",
+                    trip_id=status_request.trip_id,
+                    old_status="started",
+                    new_status="started",
+                    updated_at=datetime.utcnow().isoformat()
+                )
+            if not trip.rider_confirmed_pickup:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cannot start trip: Rider has not confirmed pickup yet. Please wait for rider confirmation."
+                )
         
         # Update trip status
         trip.status = status_request.status
         
         if status_request.status == "started":
             trip.started_at = datetime.utcnow()
+            
+            # Send notification to rider that trip has started
+            try:
+                await NotificationService.send_trip_notification(
+                    session=session,
+                    user_id=trip.rider_id,
+                    trip_id=trip.id,
+                    notification_type="trip_started",
+                    title="Trip Started!",
+                    message=f"Your trip to {trip.destination_address or 'destination'} has begun. Enjoy your ride!",
+                    data={
+                        "pickup_address": trip.pickup_address,
+                        "destination_address": trip.destination_address
+                    }
+                )
+                logger.info(f"🔔 Sent trip started notification to rider {trip.rider_id}")
+            except Exception as e:
+                logger.error(f"Failed to send trip started notification to rider: {e}")
+                
         elif status_request.status == "completed":
             trip.completed_at = datetime.utcnow()
             
@@ -858,16 +933,17 @@ async def update_trip_status(
             # Send notification to rider to confirm completion and rate driver
             try:
                 await NotificationService.send_trip_notification(
+                    session=session,
                     user_id=trip.rider_id,
+                    trip_id=trip.id,
                     notification_type="trip_completed",
-                    trip_data={
-                        "trip_id": trip.id,
-                        "message": "Your trip has been completed!",
+                    title="Trip Completed!",
+                    message=f"Your trip to {trip.destination_address or 'destination'} has been completed. Please rate your driver.",
+                    data={
                         "driver_name": user.name,
                         "pickup_address": trip.pickup_address,
                         "destination_address": trip.destination_address,
-                        "total_cost": trip.total_cost_tnd or trip.estimated_cost_tnd,
-                        "action_required": "Please confirm completion and rate your driver"
+                        "total_cost": trip.total_cost_tnd or trip.estimated_cost_tnd
                     }
                 )
                 logger.info(f"🔔 Sent trip completion notification to rider {trip.rider_id}")
@@ -896,6 +972,115 @@ async def update_trip_status(
         raise
     except Exception as e:
         logger.error(f"Error updating trip status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+class TripTimeoutCheckRequest(BaseModel):
+    trip_id: str
+    still_on_trip: bool
+
+
+@router.post("/trip-timeout-check")
+async def respond_to_trip_timeout(
+    request: TripTimeoutCheckRequest,
+    session: Session = Depends(get_session),
+    current_user: CurrentUser = Depends(AuthService.get_current_user_dependency)
+) -> dict:
+    """
+    Respond to 30-minute trip timeout check.
+    Driver confirms if still on trip or auto-cancels if no response within 1 minute.
+    """
+    if not TRIP_FEATURES_AVAILABLE:
+        raise HTTPException(
+            status_code=501, 
+            detail="Trip management features not available in this deployment"
+        )
+    
+    try:
+        trip_id = request.trip_id
+        still_on_trip = request.still_on_trip
+        
+        if not trip_id:
+            raise HTTPException(status_code=400, detail="trip_id is required")
+        
+        trip = session.exec(
+            select(Trip).where(Trip.id == trip_id)
+        ).first()
+        
+        if not trip:
+            raise HTTPException(status_code=404, detail="Trip not found")
+        
+        if trip.status != "started":
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Trip is not in progress (status: {trip.status})"
+            )
+        
+        if not still_on_trip:
+            # Cancel the trip
+            trip.status = "cancelled"
+            trip.cancelled_at = datetime.utcnow()
+            trip.cancellation_reason = "Trip timeout - No response to status check"
+            
+            # Set driver back to online
+            driver = session.exec(
+                select(Driver).where(Driver.user_id == trip.driver_id)
+            ).first()
+            if driver:
+                driver.driver_status = "online"
+                session.add(driver)
+            
+            # Notify both parties
+            try:
+                await NotificationService.send_trip_notification(
+                    session=session,
+                    user_id=trip.rider_id,
+                    trip_id=trip.id,
+                    notification_type="trip_cancelled",
+                    title="Trip Cancelled",
+                    message="Trip cancelled due to timeout - no status confirmation received",
+                    data={"reason": trip.cancellation_reason}
+                )
+                await NotificationService.send_trip_notification(
+                    session=session,
+                    user_id=trip.driver_id,
+                    trip_id=trip.id,
+                    notification_type="trip_cancelled",
+                    title="Trip Cancelled",
+                    message="Trip cancelled due to timeout - no status confirmation received",
+                    data={"reason": trip.cancellation_reason}
+                )
+            except Exception as e:
+                logger.error(f"Failed to send timeout cancellation notifications: {e}")
+            
+            session.add(trip)
+            session.commit()
+            
+            logger.info(f"🚗 Trip {trip.id} cancelled due to timeout")
+            
+            return {
+                "success": True,
+                "message": "Trip cancelled due to timeout",
+                "trip_status": "cancelled"
+            }
+        else:
+            # User confirmed still on trip - update last_status_check timestamp
+            if not hasattr(trip, 'last_status_check'):
+                # Add timestamp field if it doesn't exist (will need migration)
+                logger.warning("last_status_check field not available on Trip model")
+            
+            logger.info(f"🚗 Trip {trip.id} confirmed as still in progress")
+            
+            return {
+                "success": True,
+                "message": "Trip status confirmed - continuing",
+                "trip_status": "started"
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error handling trip timeout response: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -1075,10 +1260,7 @@ async def get_driver_earnings(
         total_fare = sum(trip.total_cost_tnd or 0 for trip in completed_trips)
         total_trips = len(completed_trips)
         
-        # Use default commission rate (20%)
-        # TODO: Move to platform settings when settings table is implemented
-        commission_rate = 20.0
-        
+        commission_rate = 20.0  # Default platform commission
         commission = (total_fare * commission_rate) / 100
         net_earnings = total_fare - commission
         

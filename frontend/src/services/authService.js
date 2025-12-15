@@ -16,7 +16,15 @@ const authService = {
 
   // Get current user
   getCurrentUser: async () => {
-    return await api.get('/auth/me')
+    try {
+      return await api.get('/auth/me')
+    } catch (error) {
+      // Silently handle 401 - it just means no active session
+      if (error.response?.status === 401) {
+        throw new Error('Not authenticated')
+      }
+      throw error
+    }
   },
 
   // Register new user
@@ -65,6 +73,11 @@ const authService = {
   // Admin login
   adminLogin: async (email, password) => {
     return await api.post('/admin/login', { email, password })
+  },
+
+  // Logout (clears HttpOnly cookie)
+  logout: async () => {
+    return await api.post('/auth/logout')
   },
 
   // Reset password

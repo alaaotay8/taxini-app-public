@@ -210,8 +210,10 @@
                 type="tel" 
                 class="form-input"
                 placeholder="+216 XX XXX XXX"
-                required
+                disabled
+                style="opacity: 0.6; cursor: not-allowed; background-color: #1a3a2e;"
               />
+              <p class="form-hint" style="font-size: 12px; color: #888; margin-top: 4px;">Phone number cannot be changed</p>
             </div>
 
             <div class="form-group">
@@ -232,7 +234,10 @@
                 type="text" 
                 class="form-input"
                 placeholder="Enter taxi number"
+                disabled
+                style="opacity: 0.6; cursor: not-allowed; background-color: #1a3a2e;"
               />
+              <p class="form-hint" style="font-size: 12px; color: #888; margin-top: 4px;">Taxi number cannot be changed</p>
             </div>
 
             <div class="modal-actions">
@@ -270,6 +275,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { userAPI } from '@/services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -367,17 +373,26 @@ const saveProfile = async () => {
   saving.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    console.log('💾 Saving driver profile changes to database:', editForm.value)
     
-    // Update user data (in real app, this would be an API call)
-    Object.assign(user.value, editForm.value)
+    // Call backend API to update profile in database
+    const response = await userAPI.updateProfile({
+      name: editForm.value.name,
+      email: editForm.value.email
+    })
+    
+    console.log('✅ Profile update response from backend:', response)
+    
+    // Refresh user data from backend to get latest values
+    await authStore.getCurrentUser()
+    
+    console.log('✅ Profile saved and refreshed from database')
+    toastMessage.value = 'Profile updated successfully!'
     
     // Close modal
     showEditModal.value = false
     
     // Show success toast
-    toastMessage.value = 'Profile updated successfully!'
     showSuccessToast.value = true
     
     // Hide toast after 3 seconds
@@ -385,8 +400,14 @@ const saveProfile = async () => {
       showSuccessToast.value = false
     }, 3000)
   } catch (error) {
-    console.error('Error saving profile:', error)
-    toastMessage.value = 'Failed to update profile'
+    console.error('❌ Error updating profile:', error)
+    console.error('❌ Error details:', {
+      message: error.message,
+      response: error.response,
+      status: error.response?.status,
+      data: error.response?.data
+    })
+    toastMessage.value = error.response?.data?.detail || 'Failed to update profile'
     showSuccessToast.value = true
     setTimeout(() => {
       showSuccessToast.value = false

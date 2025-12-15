@@ -4,7 +4,7 @@ Authentication service using Supabase Auth with normalized responses.
 
 import logging
 from typing import Optional, Dict, Any
-from fastapi import Header, HTTPException
+from fastapi import Header, HTTPException, Cookie
 from gotrue.errors import AuthError
 
 from . import supabase_client
@@ -486,15 +486,20 @@ class AuthService:
             }
 
     @staticmethod
-    def get_current_user_dependency(authorization: Optional[str] = Header(None)) -> CurrentUser:
+    def get_current_user_dependency(
+        authorization: Optional[str] = Header(None),
+        access_token: Optional[str] = Cookie(None)
+    ) -> CurrentUser:
         """
         FastAPI dependency to get current user from JWT token.
         
+        Supports both HttpOnly cookies (preferred) and Authorization header (fallback).
         In development mode: Uses database user ID directly.
         In production mode: Uses Supabase auth ID and looks up user in database.
         
         Args:
-            authorization: Authorization header value
+            authorization: Authorization header value (fallback for backward compatibility)
+            access_token: HttpOnly cookie value (preferred method)
             
         Returns:
             CurrentUser instance with user information
@@ -509,13 +514,20 @@ class AuthService:
         from src.models.user import User
         from sqlmodel import select
         
-        if not authorization or not authorization.startswith("Bearer "):
+        # Try cookie first (HttpOnly), then Authorization header (backward compatibility)
+        token = None
+        if access_token:
+            token = access_token
+        elif authorization and authorization.startswith("Bearer "):
+            token = authorization.replace("Bearer ", "")
+        
+        if not token:
             raise HTTPException(
                 status_code=401,
-                detail="Authorization header required"
+                detail="Authentication required"
             )
 
-        token = authorization.replace("Bearer ", "")
+        token = token  # Use the token we extracted from cookie or header
         result = AuthService.get_user_by_token(token)
         
         if not result["success"]:

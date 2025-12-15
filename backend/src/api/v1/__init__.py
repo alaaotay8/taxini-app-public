@@ -28,6 +28,7 @@ from .riders import router as riders_router
 from .admin import router as admin_router
 from .tickets import router as tickets_router
 from .admin_tickets import router as admin_tickets_router
+from .notifications import router as notifications_router
 
 # Main v1 router
 router = APIRouter()
@@ -39,5 +40,6 @@ router.include_router(riders_router)
 router.include_router(admin_router)
 router.include_router(tickets_router)
 router.include_router(admin_tickets_router)
+router.include_router(notifications_router)
 
 __all__ = ["router"]
