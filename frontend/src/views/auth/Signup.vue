@@ -1,48 +1,45 @@
 <template>
   <div class="phone-screen bg-taxini-dark">
     <!-- Header with Logo -->
-    <div class="p-6 pt-12 text-center">
-      <img src="/src/assets/logo.png" alt="Taxini" class="w-32 h-32 mx-auto object-contain" />
+    <div class="p-4 pt-8 text-center">
+      <img src="/src/assets/logo.png" alt="Taxini" class="w-24 h-24 mx-auto object-contain" />
     </div>
 
     <!-- Content -->
-    <div class="flex-1 flex flex-col px-8 py-6 overflow-y-auto">
-      <div class="space-y-6 animate-slide-up">
+    <div class="flex-1 flex flex-col px-8 py-3 overflow-y-auto">
+      <div class="space-y-3 animate-slide-up">
         <!-- Step 1: Registration Form -->
         <div v-if="step === 1">
-          <div class="mb-6">
-            <h2 class="text-2xl font-semibold text-white mb-2">Create Account</h2>
+          <div class="mb-3">
+            <h2 class="text-2xl font-semibold text-white mb-1">Create Account</h2>
             <p class="text-taxini-text-gray text-sm">Join Taxini community</p>
           </div>
         
         <!-- Role Selection -->
-        <div class="space-y-3">
+        <div class="space-y-2">
           <label class="block text-xs font-medium text-taxini-text-gray uppercase tracking-wider">Select Role</label>
           <div class="flex gap-3">
             <button 
               @click="selectedRole = 'rider'" 
               :class="selectedRole === 'rider' ? 'bg-taxini-yellow text-taxini-dark shadow-lg' : 'bg-taxini-dark-light text-taxini-text-gray border border-taxini-green/20'" 
-              class="flex-1 py-4 rounded-xl font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-2"
+              class="flex-1 py-3 rounded-xl font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-1.5"
             >
-              <img src="/src/assets/RiderIcon.png" alt="Rider" class="w-8 h-8 object-contain" :class="selectedRole === 'rider' ? '' : 'opacity-60'" />
+              <img src="/src/assets/RiderIcon.png" alt="Rider" class="w-7 h-7 object-contain" :class="selectedRole === 'rider' ? '' : 'opacity-60'" />
               <span>Rider</span>
             </button>
             <button 
               @click="selectedRole = 'driver'" 
               :class="selectedRole === 'driver' ? 'bg-taxini-yellow text-taxini-dark shadow-lg' : 'bg-taxini-dark-light text-taxini-text-gray border border-taxini-green/20'" 
-              class="flex-1 py-4 rounded-xl font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-2"
+              class="flex-1 py-3 rounded-xl font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-1.5"
             >
-              <img src="/src/assets/DriverIcon.png" alt="Driver" class="w-8 h-8 object-contain" :class="selectedRole === 'driver' ? '' : 'opacity-60'" />
+              <img src="/src/assets/DriverIcon.png" alt="Driver" class="w-7 h-7 object-contain" :class="selectedRole === 'driver' ? '' : 'opacity-60'" />
               <span>Driver</span>
             </button>
           </div>
         </div>
         
-        <!-- Extra spacing before form fields -->
-        <div class="pt-4"></div>
-        
         <!-- Form Fields -->
-        <div class="space-y-4">
+        <div class="space-y-6 pt-4 pb-2">
           <div class="space-y-2">
             <label class="block text-xs font-medium text-taxini-text-gray uppercase tracking-wider">Full Name</label>
             <input 
@@ -77,11 +74,8 @@
           </div>
         </div>
         
-        <!-- Extra spacing before role-specific fields -->
-        <div class="pt-4"></div>
-        
         <!-- Rider-specific fields -->
-        <div v-if="selectedRole === 'rider'" class="space-y-4">
+        <div v-if="selectedRole === 'rider'" class="space-y-4 pb-2">
           <div class="space-y-2">
             <label class="block text-xs font-medium text-taxini-text-gray uppercase tracking-wider">Residence Place</label>
             <input 
@@ -100,7 +94,7 @@
         </div>
         
         <!-- Driver-specific fields -->
-        <div v-if="selectedRole === 'driver'" class="space-y-4">
+        <div v-if="selectedRole === 'driver'" class="space-y-4 pb-2">
           <div class="space-y-2">
             <label class="block text-xs font-medium text-taxini-text-gray uppercase tracking-wider">Taxi Number</label>
             <input 
@@ -122,15 +116,15 @@
             />
             <button 
               @click="$refs.idCardInput.click()" 
-              class="w-full bg-taxini-dark-light text-taxini-text-gray px-4 py-3 rounded-xl border border-dashed border-taxini-green/30 hover:border-taxini-yellow hover:bg-taxini-dark transition-all flex items-center justify-center gap-2 text-sm"
+              class="w-full bg-taxini-dark-light text-taxini-text-gray px-4 py-2.5 rounded-xl border border-dashed border-taxini-green/30 hover:border-taxini-yellow hover:bg-taxini-dark transition-all flex items-center justify-center gap-2 text-sm"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span>{{ formData.idCardName || 'Upload ID Card' }}</span>
             </button>
-            <div v-if="formData.idCardPreview" class="mt-2 relative rounded-xl overflow-hidden border border-taxini-green/20">
-              <img :src="formData.idCardPreview" alt="ID Card" class="w-full h-32 object-cover" />
+            <div v-if="formData.idCardPreview" class="mt-1.5 relative rounded-xl overflow-hidden border border-taxini-green/20">
+              <img :src="formData.idCardPreview" alt="ID Card" class="w-full h-24 object-cover" />
               <button 
                 @click="removeIDCard" 
                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full shadow-lg transition-colors flex items-center justify-center text-sm"
@@ -149,15 +143,15 @@
             />
             <button 
               @click="$refs.licenseInput.click()" 
-              class="w-full bg-taxini-dark-light text-taxini-text-gray px-4 py-3 rounded-xl border border-dashed border-taxini-green/30 hover:border-taxini-yellow hover:bg-taxini-dark transition-all flex items-center justify-center gap-2 text-sm"
+              class="w-full bg-taxini-dark-light text-taxini-text-gray px-4 py-2.5 rounded-xl border border-dashed border-taxini-green/30 hover:border-taxini-yellow hover:bg-taxini-dark transition-all flex items-center justify-center gap-2 text-sm"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
               <span>{{ formData.licenseName || 'Upload Driver License' }}</span>
             </button>
-            <div v-if="formData.licensePreview" class="mt-2 relative rounded-xl overflow-hidden border border-taxini-green/20">
-              <img :src="formData.licensePreview" alt="License" class="w-full h-32 object-cover" />
+            <div v-if="formData.licensePreview" class="mt-1.5 relative rounded-xl overflow-hidden border border-taxini-green/20">
+              <img :src="formData.licensePreview" alt="License" class="w-full h-24 object-cover" />
               <button 
                 @click="removeLicense" 
                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full shadow-lg transition-colors flex items-center justify-center text-sm"
@@ -165,9 +159,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- Extra spacing before buttons -->
-        <div class="pt-4"></div>
         
         <!-- Error Message -->
         <transition name="fade">
@@ -180,7 +171,7 @@
         <button 
           @click="handleContinue" 
           :disabled="loading || !isFormValid" 
-          class="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          class="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold mt-4"
         >
           <span v-if="loading">Sending OTP...</span>
           <span v-else>Continue</span>
@@ -370,6 +361,11 @@ const handleVerifyOTP = async () => {
     return
   }
   
+  if (!formData.value.phone) {
+    error.value = 'Phone number is missing. Please go back and enter your phone number.'
+    return
+  }
+  
   loading.value = true
   try {
     // In development mode, just check if OTP is correct (123456)
@@ -392,6 +388,8 @@ const handleVerifyOTP = async () => {
       signupData.taxi_number = formData.value.taxiNumber
       successMessage.value = 'Your driver account has been created. Please wait while we verify your documents.'
     }
+    
+    console.log('📤 Signup data being sent:', signupData)
     
     // Create account
     await authStore.signup(signupData)

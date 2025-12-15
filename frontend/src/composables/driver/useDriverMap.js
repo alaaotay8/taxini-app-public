@@ -11,8 +11,8 @@ export function useDriverMap() {
   const routeLayer = ref(null)
   
   const driverLocation = ref({
-    lat: 36.8065, // Default: Tunis
-    lng: 10.1815
+    lat: null, // Will be set by GPS
+    lng: null
   })
   
   const gpsActive = ref(false)
@@ -33,10 +33,16 @@ export function useDriverMap() {
 
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
 
+    // Use default center if GPS not available yet, will update when GPS activates
+    const defaultCenter = [10.1815, 36.8065] // Tunis as fallback
+    const center = (driverLocation.value.lng && driverLocation.value.lat) 
+      ? [driverLocation.value.lng, driverLocation.value.lat]
+      : defaultCenter
+
     map.value = new mapboxgl.Map({
       container: mapContainer.value,
       style: import.meta.env.VITE_MAPBOX_STYLE || 'mapbox://styles/mapbox/dark-v11',
-      center: [driverLocation.value.lng, driverLocation.value.lat],
+      center: center,
       zoom: 13,
       pitch: 30,
       attributionControl: false,
@@ -52,7 +58,7 @@ export function useDriverMap() {
       } catch (e) { /* ignore */ }
     })
 
-    // Add driver marker
+    // Add driver marker (will be positioned when GPS activates)
     const el = document.createElement('div')
     el.innerHTML = '🚕'
     el.style.fontSize = '32px'
@@ -62,8 +68,11 @@ export function useDriverMap() {
       element: el,
       anchor: 'bottom'
     })
-      .setLngLat([driverLocation.value.lng, driverLocation.value.lat])
-      .addTo(map.value)
+    
+    // Only add marker to map if we have a location
+    if (driverLocation.value.lng && driverLocation.value.lat) {
+      driverMarker.value.setLngLat([driverLocation.value.lng, driverLocation.value.lat]).addTo(map.value)
+    }
   }
 
   // Get current location with continuous updates
@@ -75,9 +84,14 @@ export function useDriverMap() {
           driverLocation.value = { lat: latitude, lng: longitude }
           gpsActive.value = true
           
-          // Update marker position
+          console.log('📍 GPS location updated:', latitude, longitude)
+          
+          // Update marker position or add it if not yet on map
           if (driverMarker.value) {
             driverMarker.value.setLngLat([longitude, latitude])
+            if (!driverMarker.value.getElement().parentNode) {
+              driverMarker.value.addTo(map.value)
+            }
           }
           
           // Don't auto-center map if viewing route preview or if there's an active trip

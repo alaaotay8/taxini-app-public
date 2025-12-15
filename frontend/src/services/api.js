@@ -58,9 +58,12 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response) {
+      // Server responded with error status
+      // Suppress 401 errors in console (handled by auth store)
       if (error.response.status === 401) {
-        return Promise.reject(error)
+        return Promise.reject(new Error('Unauthorized'))
       }
+      // Extract error message from response
       const message = error.response.data?.detail || error.response.data?.message || 'An error occurred'
       return Promise.reject(new Error(message))
     } else if (error.request) {

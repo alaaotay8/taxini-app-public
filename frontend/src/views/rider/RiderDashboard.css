@@ -1822,33 +1822,13 @@ button[class*="btn-"] {
    For screens 1024px and above
    =================================== */
 
-/* Constrain dashboard to max width and center */
+/* Full width layout for desktop */
 @media (min-width: 1024px) {
   .rider-dashboard {
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
     position: relative;
-  }
-
-  /* Bottom sheet - constrain width and position on right side */
-  .bottom-sheet {
-    position: fixed;
-    right: 0;
-    left: auto;
-    width: 450px;
-    max-width: 450px;
-    height: 100vh;
-    top: 0;
-    bottom: auto;
-    border-radius: 0;
-    border-left: 2px solid rgba(255, 208, 0, 0.3);
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Map takes remaining space */
-  .map-wrapper {
-    right: 450px;
-    width: calc(100% - 450px);
   }
 
   /* Header - full width at top */
@@ -1857,16 +1837,14 @@ button[class*="btn-"] {
     top: 0;
     left: 0;
     right: 0;
+    width: 100%;
     z-index: 100;
-    max-width: 1400px;
-    margin: 0 auto;
   }
 
-  /* Bottom sheet content padding */
-  .bottom-sheet > div {
-    padding: 1.5rem;
-    overflow-y: auto;
-    max-height: 100vh;
+  /* Map takes full space */
+  .map-wrapper {
+    right: 0;
+    width: 100%;
   }
 
   /* Driver cards - better spacing on desktop */
@@ -1889,87 +1867,6 @@ button[class*="btn-"] {
     right: 470px;
   }
 
-  /* Destination confirmation - adjust for desktop */
-  .destination-confirmation {
-    right: 470px;
-    left: auto;
-    transform: translateX(0);
-  }
-
-  /* Notification panel - adjust for desktop */
-  .notification-panel {
-    right: 460px;
-    width: 400px;
-  }
-}
-
-/* Extra large screens (1440px+) */
-@media (min-width: 1440px) {
-  .rider-dashboard {
-    max-width: 1600px;
-  }
-
-  .bottom-sheet {
-    width: 500px;
-    max-width: 500px;
-  }
-
-  .map-wrapper {
-    right: 500px;
-    width: calc(100% - 500px);
-  }
-
-  .map-controls-group {
-    right: 520px;
-  }
-
-  .destination-confirmation {
-    right: 520px;
-  }
-
-  .notification-panel {
-    right: 510px;
-  }
-}
-
-/* Ultra wide screens (1920px+) */
-@media (min-width: 1920px) {
-  .rider-dashboard {
-    max-width: 1800px;
-  }
-
-  .bottom-sheet {
-    width: 550px;
-    max-width: 550px;
-  }
-
-  .map-wrapper {
-    right: 550px;
-    width: calc(100% - 550px);
-  }
-
-  .map-controls-group {
-    right: 570px;
-  }
-
-  .destination-confirmation {
-    right: 570px;
-  }
-
-  .notification-panel {
-    right: 560px;
-    width: 450px;
-  }
-
-  /* Larger text and spacing for ultra wide */
-  .bottom-sheet h1,
-  .bottom-sheet h2 {
-    font-size: 1.75rem;
-  }
-
-  .driver-card {
-    padding: 1.5rem;
-  }
 }
 /* ===================================
    Desktop/Large Screen Optimizations
@@ -1978,109 +1875,138 @@ button[class*="btn-"] {
 
 /* Desktop Layout (1024px+) - Optimized for large screens */
 @media (min-width: 1024px) {
-  /* Main container with max-width */
+  /* Main container - full width, no max-width constraint */
   .rider-dashboard {
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
     position: relative;
   }
   
-  /* Bottom sheet as compact sidebar on right */
+  /* Header - full width */
+  .rider-dashboard > div:first-child {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+  
+  /* Bottom sheet - full width edge to edge */
   .bottom-sheet {
     position: fixed !important;
-    right: 30px !important;
-    left: auto !important;
-    bottom: 30px !important;
-    top: 100px !important;
-    width: 380px !important;
-    max-width: 380px !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
     height: auto !important;
-    max-height: calc(100vh - 150px) !important;
-    transform: translateY(0) !important;
-    border-radius: 16px !important;
-    border: 2px solid rgba(255, 208, 0, 0.25) !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+    max-height: calc(100vh - 72px) !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-top: 2px solid rgba(255, 208, 0, 0.3) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5) !important;
     overflow-y: auto !important;
     z-index: 100 !important;
   }
   
   .bottom-sheet.collapsed {
-    transform: translateX(450px) !important;
+    transform: translateY(100%) !important;
   }
   
   .bottom-sheet.expanded {
     transform: translateY(0) !important;
   }
   
-  /* Compact all content inside bottom sheet */
+  /* Content inside bottom sheet - comfortable sizing */
   .bottom-sheet > div,
   .bottom-sheet .px-6 {
-    padding: 1rem !important;
+    padding: 1.25rem !important;
   }
   
   .bottom-sheet h2 {
-    font-size: 1.125rem !important;
-    margin-bottom: 0.625rem !important;
+    font-size: 1.25rem !important;
+    margin-bottom: 0.75rem !important;
+    font-weight: 700 !important;
   }
   
   .bottom-sheet p {
-    font-size: 0.8125rem !important;
+    font-size: 0.9375rem !important;
+    line-height: 1.5 !important;
   }
   
-  /* Compact inputs */
+  /* Inputs - comfortable sizing */
   .bottom-sheet input,
   .bottom-sheet .location-input,
   .bottom-sheet .search-input {
-    padding: 0.625rem 0.75rem !important;
-    font-size: 0.8125rem !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9375rem !important;
   }
   
-  /* Compact buttons */
+  /* Buttons - comfortable sizing */
   .bottom-sheet button {
-    padding: 0.625rem 0.875rem !important;
-    font-size: 0.8125rem !important;
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
   }
   
-  /* Compact driver cards */
+  /* Driver cards - comfortable sizing */
   .bottom-sheet .driver-card {
-    padding: 0.75rem !important;
-    margin-bottom: 0.625rem !important;
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
   }
   
   .bottom-sheet .driver-card .w-16 {
-    width: 2.75rem !important;
-    height: 2.75rem !important;
+    width: 3rem !important;
+    height: 3rem !important;
   }
   
   .bottom-sheet .driver-card h3 {
-    font-size: 0.875rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
   }
   
   .bottom-sheet .driver-card p,
   .bottom-sheet .driver-card span {
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
   }
   
   .bottom-sheet .driver-card svg {
-    width: 0.875rem !important;
-    height: 0.875rem !important;
+    width: 0.9375rem !important;
+    height: 0.9375rem !important;
   }
   
-  /* Compact labels */
+  /* Labels - comfortable sizing */
   .bottom-sheet .text-xs {
-    font-size: 0.6875rem !important;
-  }
-  
-  .bottom-sheet .text-sm {
     font-size: 0.75rem !important;
   }
   
+  .bottom-sheet .text-sm {
+    font-size: 0.875rem !important;
+  }
+  
   .bottom-sheet .text-base {
-    font-size: 0.8125rem !important;
+    font-size: 1rem !important;
   }
   
   .bottom-sheet .text-lg {
-    font-size: 0.9375rem !important;
+    font-size: 1.125rem !important;
+  }
+  
+  /* Compact location labels */
+  .bottom-sheet .location-label {
+    font-size: 0.625rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  /* Compact gap between sections */
+  .bottom-sheet .space-y-4 > * + * {
+    margin-top: 0.625rem !important;
+  }
+  
+  .bottom-sheet .space-y-6 > * + * {
+    margin-top: 0.75rem !important;
   }
   
   /* Show sheet toggle button */

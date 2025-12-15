@@ -895,8 +895,13 @@ const checkApprovalStatus = async () => {
       console.log('📋 Driver info:', response.driver)
     }
   } catch (error) {
+    // Suppress network errors during initialization - driver can still use app
+    if (error.message?.includes('Network error')) {
+      console.warn('⚠️ Could not fetch driver profile (network error) - using default status')
+      return
+    }
+    
     console.error('❌ Failed to fetch driver profile:', error)
-    console.error('   Error message:', error.message)
     
     // Check if it's an authentication error
     if (error.message?.includes('token') || error.message?.includes('Invalid') || error.message?.includes('Signature') || error.message?.includes('401') || error.message?.includes('Session expired')) {
@@ -1597,7 +1602,12 @@ onMounted(async () => {
           console.warn('⚠️ Earnings API returned success=false')
         }
       } catch (error) {
-        console.error('❌ Failed to fetch earnings:', error.message, error)
+        // Suppress network errors during initialization
+        if (error.message?.includes('Network error')) {
+          console.warn('⚠️ Could not fetch earnings (network error) - will retry later')
+        } else {
+          console.error('❌ Failed to fetch earnings:', error.message)
+        }
       }
     })()
   ])

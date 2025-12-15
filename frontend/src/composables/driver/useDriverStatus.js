@@ -90,17 +90,31 @@ export function useDriverStatus() {
         stopOnlineTimer()
       }
     } catch (error) {
-      console.error('❌ Failed to toggle status:', error)
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response,
-        status: error.response?.status,
-        data: error.response?.data
-      })
-      
-      // Show detailed error to user
-      const errorMessage = error.message || 'Failed to update status. Please try again.'
-      alert(errorMessage)
+      // Handle network errors gracefully - allow offline mode toggle
+      if (error.message?.includes('Network error')) {
+        console.warn('⚠️ Network error - toggling status locally only')
+        isOnline.value = !isOnline.value
+        
+        if (isOnline.value) {
+          startPollingTrips(isOnline)
+          startOnlineTimer()
+        } else {
+          stopPollingTrips()
+          stopOnlineTimer()
+        }
+      } else {
+        console.error('❌ Failed to toggle status:', error)
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response,
+          status: error.response?.status,
+          data: error.response?.data
+        })
+        
+        // Show detailed error to user
+        const errorMessage = error.message || 'Failed to update status. Please try again.'
+        alert(errorMessage)
+      }
     } finally {
       loading.value = false
     }

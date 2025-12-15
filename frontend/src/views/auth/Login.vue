@@ -175,6 +175,12 @@ const handleVerifyOTP = async () => {
     return
   }
 
+  // In development mode, accept 123456 as valid OTP
+  if (otpCode.value !== '123456') {
+    error.value = 'Invalid OTP code. In development mode, use: 123456'
+    return
+  }
+
   loading.value = true
 
   try {

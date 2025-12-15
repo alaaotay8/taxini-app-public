@@ -125,12 +125,33 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     try {
       const response = await authService.register(signupData)
-      user.value = response.user
-      localStorage.setItem('taxini_phone', response.user.phone)
+      console.log('✅ Signup response received:', response)
+      
+      // Handle response structure - API returns response.data
+      const userData = response.data?.user || response.user
+      
+      if (!userData) {
+        console.error('❌ No user data in response:', response)
+        throw new Error('Invalid response from server')
+      }
+      
+      user.value = userData
+      localStorage.setItem('taxini_phone', userData.phone)
       return response
     } catch (err) {
-      error.value = err.message || 'Failed to register'
-      throw err
+      console.error('❌ Signup error:', err)
+      console.error('❌ Error response:', err.response?.data)
+      
+      // Extract error message from response
+      let errorMessage = 'Failed to register'
+      if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      error.value = errorMessage
+      throw new Error(errorMessage)
     } finally {
       loading.value = false
     }
@@ -141,7 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
    * 
    * Called on app startup to restore session from HttpOnly cookie.
    * If cookie is valid, user data is returned and user is logged in.
-   * If cookie is invalid/expired, 401 error triggers logout.
+   * If cookie is invalid/expired, silently fail (user stays logged out).
    * 
    * @returns {Promise} Response with user data
    */
@@ -151,13 +172,14 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authService.getCurrentUser()
       user.value = response.user
+      console.log('✅ Session restored:', user.value.name, user.value.role)
       return response
     } catch (err) {
-      error.value = err.message
-      if (err.response?.status === 401) {
-        logout()
-      }
-      throw err
+      // Silently fail on session restore - don't log out or show errors
+      // This prevents logout on page reload when cookie is expired
+      console.log('ℹ️ No active session found')
+      user.value = null
+      return null
     } finally {
       loading.value = false
     }

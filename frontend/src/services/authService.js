@@ -29,14 +29,18 @@ const authService = {
 
   // Register new user
   register: async (userData) => {
-    return await api.post('/auth/register', {
+    const payload = {
       name: userData.name,
       email: userData.email,
       phone: userData.phone,
       role: userData.role,
       residence_place: userData.residence_place,
       taxi_number: userData.taxi_number
-    })
+    }
+    console.log('📤 Register API payload:', payload)
+    const response = await api.post('/auth/register', payload)
+    console.log('✅ Register API response:', response)
+    return response
   },
 
   // Create user profile (after OTP verification)

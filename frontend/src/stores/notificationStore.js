@@ -82,7 +82,10 @@ export const useNotificationStore = defineStore('notifications', () => {
       unreadCount.value = count
       return count
     } catch (err) {
-      // Silently fail - keeps existing count
+      // Silently fail on network errors - keeps existing count
+      if (!err.message?.includes('Network error')) {
+        console.warn('⚠️ Could not fetch unread count:', err.message)
+      }
       return unreadCount.value
     }
   }
