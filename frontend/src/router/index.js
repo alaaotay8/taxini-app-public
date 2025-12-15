@@ -12,7 +12,6 @@ import CreateProfile from '@/views/auth/CreateProfile.vue'
 // Lazy load dashboards (loaded on demand for faster initial load)
 const RiderDashboard = () => import('@/views/rider/RiderDashboard.vue')
 const DriverDashboard = () => import('@/views/driver/DriverDashboard.vue')
-const AdminDashboard = () => import('@/views/admin/AdminDashboard.vue')
 
 // Lazy load all secondary views (loaded only when needed)
 const RiderTripHistory = () => import('@/views/rider/RiderTripHistory.vue')
@@ -23,14 +22,6 @@ const DriverTripHistory = () => import('@/views/driver/DriverTripHistory.vue')
 const DriverEarnings = () => import('@/views/driver/DriverEarnings.vue')
 const DriverProfile = () => import('@/views/driver/DriverProfile.vue')
 const DriverSupport = () => import('@/views/driver/DriverSupport.vue')
-
-const AdminLogin = () => import('@/views/admin/AdminLogin.vue')
-const AdminDrivers = () => import('@/views/admin/AdminDrivers.vue')
-const AdminRiders = () => import('@/views/admin/AdminRiders.vue')
-const AdminTrips = () => import('@/views/admin/AdminTrips.vue')
-const AdminSettings = () => import('@/views/admin/AdminSettings.vue')
-const AdminTickets = () => import('@/views/admin/AdminTickets.vue')
-const AdminStatistics = () => import('@/views/admin/AdminStatistics.vue')
 
 const routes = [
   // Public Routes
@@ -121,56 +112,6 @@ const routes = [
     name: 'DriverSupport',
     component: DriverSupport,
     meta: { requiresAuth: true, role: 'driver' }
-  },
-
-  // Admin Routes
-  {
-    path: '/admin/login',
-    name: 'AdminLogin',
-    component: AdminLogin,
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/admin',
-    name: 'AdminDashboard',
-    component: AdminDashboard,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  {
-    path: '/admin/drivers',
-    name: 'AdminDrivers',
-    component: AdminDrivers,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  {
-    path: '/admin/riders',
-    name: 'AdminRiders',
-    component: AdminRiders,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  {
-    path: '/admin/trips',
-    name: 'AdminTrips',
-    component: AdminTrips,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  {
-    path: '/admin/settings',
-    name: 'AdminSettings',
-    component: AdminSettings,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  {
-    path: '/admin/tickets',
-    name: 'AdminTickets',
-    component: AdminTickets,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  {
-    path: '/admin/statistics',
-    name: 'AdminStatistics',
-    component: AdminStatistics,
-    meta: { requiresAuth: true, role: 'admin' }
   },
 
   // 404 Catch-all

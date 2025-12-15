@@ -51,11 +51,31 @@ This repository demonstrates professional-grade code architecture, best practice
 - 🚦 **Online/Offline Toggle** - Control availability instantly
 - 🎯 **Smart Routing** - Optimized routes with distance calculations
 
-### For Admins 👨‍💼
-- 👥 **User Management** - Approve and manage drivers and riders
-- 📈 **Analytics Dashboard** - Platform-wide statistics
-- 🔧 **System Configuration** - Manage pricing and settings
-- 🎫 **Support System** - Handle tickets and customer support
+---
+
+## 📌 About This Version
+
+This repository showcases **core architecture and implementation patterns** for educational and portfolio purposes. The codebase demonstrates:
+
+- ✅ **Clean full-stack architecture** - Modular, maintainable, scalable
+- ✅ **Production-ready code quality** - Type safety, error handling, testing
+- ✅ **Modern development practices** - Composition API, async/await, RESTful design
+- ✅ **Real-time features** - WebSocket integration, live updates
+
+**Note:** This version uses simplified implementations for demonstration:
+- **Pricing**: Fixed-rate calculation (5.0 TND base + 2.5 TND/km)
+- **Matching**: Distance-based driver assignment
+- **Features**: Core rider and driver functionality
+
+**Enterprise features available separately:**
+- 🔒 Advanced admin analytics dashboard
+- 🔒 Dynamic pricing optimization
+- 🔒 AI-powered driver matching
+- 🔒 Real-time business intelligence
+- 🔒 Fraud detection systems
+- 🔒 Revenue optimization algorithms
+
+*Contact for enterprise licensing and advanced features.*
 
 ---
 
