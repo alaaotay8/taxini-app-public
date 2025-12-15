@@ -68,12 +68,42 @@ This repository showcases **core architecture and implementation patterns** for 
 - **Features**: Core rider and driver functionality
 
 **Enterprise features available separately:**
-- 🔒 Advanced admin analytics dashboard
-- 🔒 Dynamic pricing optimization
-- 🔒 AI-powered driver matching
-- 🔒 Real-time business intelligence
-- 🔒 Fraud detection systems
-- 🔒 Revenue optimization algorithms
+
+### 🔒 Hidden/Removed Features (Available in Enterprise Version)
+
+#### Admin & Analytics:
+- **Admin Dashboard** - Complete platform management interface
+- **Revenue Analytics** - Real-time revenue tracking (daily/weekly/monthly)
+- **Driver Performance Metrics** - Rankings, ratings, completion rates
+- **Business Intelligence** - Advanced analytics and reporting
+- **Platform Statistics** - User growth, trip trends, revenue forecasts
+- **Settings Management** - Dynamic pricing configuration
+
+#### Advanced Backend Services:
+- **Real-time Notification System** (882 lines) - Complex Supabase Realtime integration with auto-rejection timers
+- **GPS Streaming Service** (352 lines) - WebSocket-based location streaming with hardcoded route simulation
+- **Supabase Integration** - File upload, storage management, real-time channels
+- **Ticket Management System** - Customer support and issue tracking
+- **Admin Authentication** - Separate admin login and authorization
+
+#### Advanced Features:
+- **Driver Earnings Dashboard** - Detailed earnings breakdown with commission tracking
+- **Support System** - Integrated customer support for drivers and riders
+- **Dynamic Pricing Engine** - Surge pricing, time-based multipliers
+- **AI-Powered Matching** - Intelligent driver-rider matching algorithms
+- **Fraud Detection** - Pattern recognition and anomaly detection
+- **Revenue Optimization** - Business intelligence and profit maximization
+
+#### What This Version Includes:
+- ✅ Core trip booking and management
+- ✅ Basic driver matching (nearest available)
+- ✅ Fixed-rate pricing (5.0 TND + 2.5 TND/km)
+- ✅ User authentication (JWT)
+- ✅ Location tracking (basic)
+- ✅ Trip history
+- ✅ User profiles
+
+**Total Protected Code:** ~70,000+ lines of proprietary business logic
 
 *Contact for enterprise licensing and advanced features.*
 

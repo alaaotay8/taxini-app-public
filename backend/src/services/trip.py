@@ -1,7 +1,17 @@
 """
 Trip management service with driver assignment and notification handling.
 
-Integrated with Supabase Realtime notifications for seamless driver communication.
+SIMPLIFIED FOR PUBLIC SHOWCASE:
+- Basic driver matching (nearest available within 10km)
+- Fixed-rate pricing (5.0 TND base + 2.5 TND/km)
+- Standard trip lifecycle management
+
+ENTERPRISE VERSION INCLUDES:
+- AI-powered driver matching with predictive algorithms
+- Dynamic surge pricing based on demand
+- Advanced route optimization
+- Real-time demand forecasting
+- Driver performance scoring
 """
 
 import asyncio

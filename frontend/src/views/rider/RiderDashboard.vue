@@ -1,3 +1,20 @@
+<!--
+  RIDER DASHBOARD - SIMPLIFIED FOR PUBLIC SHOWCASE
+  
+  This version includes:
+  - Basic trip booking
+  - Fixed-rate pricing display
+  - Simple driver tracking
+  - Trip history
+  
+  Enterprise version includes:
+  - Dynamic pricing with surge indicators
+  - Favorite drivers and scheduled rides
+  - Ride-sharing and carpooling
+  - Advanced payment options
+  - Loyalty rewards program
+  - AI-powered price predictions
+-->
 <template>
   <div class="rider-dashboard">
     <!-- Header -->

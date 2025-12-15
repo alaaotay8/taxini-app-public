@@ -16,7 +16,21 @@ logger = logging.getLogger(__name__)
 
 
 class LocationService:
-    """Service for managing driver/rider location tracking."""
+    """
+Location service for managing driver and rider locations.
+
+SIMPLIFIED FOR PUBLIC SHOWCASE:
+- Basic Haversine distance calculation
+- Simple location storage and retrieval
+- Standard geocoding with Mapbox
+
+ENTERPRISE VERSION INCLUDES:
+- Real-time GPS streaming with WebSocket channels
+- Advanced route optimization algorithms
+- Traffic-aware ETA calculations
+- Geofencing and zone management
+- Location history analytics
+"""
     
     @staticmethod
     def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

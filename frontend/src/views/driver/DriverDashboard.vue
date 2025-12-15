@@ -1,3 +1,20 @@
+<!--
+  DRIVER DASHBOARD - SIMPLIFIED FOR PUBLIC SHOWCASE
+  
+  This version includes:
+  - Basic trip acceptance/rejection
+  - Simple location tracking
+  - Trip status management
+  - Basic earnings display
+  
+  Enterprise version includes:
+  - Advanced earnings analytics with commission breakdown
+  - Real-time GPS streaming with route optimization
+  - Driver performance metrics and rankings
+  - Smart trip recommendations
+  - Heat map of high-demand areas
+  - Predictive earnings forecasting
+-->
 <template>
   <div class="driver-container">
     <!-- Pending Approval Banner (Yellow) -->

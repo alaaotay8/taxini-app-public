@@ -16,12 +16,9 @@ const DriverDashboard = () => import('@/views/driver/DriverDashboard.vue')
 // Lazy load all secondary views (loaded only when needed)
 const RiderTripHistory = () => import('@/views/rider/RiderTripHistory.vue')
 const RiderProfile = () => import('@/views/rider/RiderProfile.vue')
-const RiderSupport = () => import('@/views/rider/RiderSupport.vue')
 
 const DriverTripHistory = () => import('@/views/driver/DriverTripHistory.vue')
-const DriverEarnings = () => import('@/views/driver/DriverEarnings.vue')
 const DriverProfile = () => import('@/views/driver/DriverProfile.vue')
-const DriverSupport = () => import('@/views/driver/DriverSupport.vue')
 
 const routes = [
   // Public Routes
@@ -75,12 +72,6 @@ const routes = [
     component: RiderProfile,
     meta: { requiresAuth: true, role: 'rider' }
   },
-  {
-    path: '/rider/support',
-    name: 'RiderSupport',
-    component: RiderSupport,
-    meta: { requiresAuth: true, role: 'rider' }
-  },
 
   // Driver Routes
   {
@@ -96,21 +87,9 @@ const routes = [
     meta: { requiresAuth: true, role: 'driver' }
   },
   {
-    path: '/driver/earnings',
-    name: 'DriverEarnings',
-    component: DriverEarnings,
-    meta: { requiresAuth: true, role: 'driver' }
-  },
-  {
     path: '/driver/profile',
     name: 'DriverProfile',
     component: DriverProfile,
-    meta: { requiresAuth: true, role: 'driver' }
-  },
-  {
-    path: '/driver/support',
-    name: 'DriverSupport',
-    component: DriverSupport,
     meta: { requiresAuth: true, role: 'driver' }
   },
 
