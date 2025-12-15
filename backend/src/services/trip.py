@@ -72,8 +72,9 @@ class TripService:
                 destination_latitude, destination_longitude
             )
             
-            # Tunisian taxi pricing: Meter-based estimate (will be replaced by actual meter reading)
-            # Base fare + distance estimate
+            # Tunisian taxi pricing: Fixed-rate calculation for demonstration
+            # Base fare: 5.0 TND + Distance rate: 2.5 TND/km
+            # Note: Production version may include dynamic pricing based on demand, time, and other factors
             estimated_meter_cost = 5.0 + (trip_distance * 2.5)
             
             # Note: Approach fee will be calculated when driver is assigned
