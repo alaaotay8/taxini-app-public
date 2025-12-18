@@ -526,15 +526,13 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-## 👨‍💻 About the Developer
+## 👨‍💻 About Me
 
 Built by **Alaa Otay** - Full-stack developer specializing in modern web applications with Vue.js and Python.
-
-- 🌐 **Portfolio:** [Your Portfolio URL]
-- 💼 **LinkedIn:** [Your LinkedIn]
-- 📧 **Email:** [Your Email]
-- 🐙 **GitHub:** [@alaaotay8](https://github.com/alaaotay8)
-
+- 💼 [LinkedIn](https://linkedin.com/in/alaa-otay8)
+- 🌐 [Portfolio Website](https://alaaotay.netlify.app)
+- 📫 Contact: [alaaotay8@gmail.com](mailto:alaaotay8@gmail.com)
+- 💬 WhatsApp: [+216 54056747](https://wa.me/+21654056747)
 ---
 
 ## 🙏 Acknowledgments
